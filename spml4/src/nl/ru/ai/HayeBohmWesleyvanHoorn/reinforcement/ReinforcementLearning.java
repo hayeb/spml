@@ -10,5 +10,4 @@ public class ReinforcementLearning {
 		// TODO Auto-generated method stub
 
 	}
-
 }

@@ -59,11 +59,23 @@ public class MarkovDecisionProblem {
 	// Counts the number of actions that has been performed
 	private int actionsCounter = 0;
 	
+	// Add a list for policy actions
+	 private Action[][] policyActions;
+	 private boolean policyAdded = false;
+	
 	/////////////////////////////////////////////////////////
 	/// FUNCTIONS
 	/////////////////////////////////////////////////////////
 	
-	/**
+	public boolean isPolicyAdded() {
+		return policyAdded;
+	}
+
+	public void setPolicyAdded(boolean policyAdded) {
+		this.policyAdded = policyAdded;
+	}
+
+	/**d1
 	 * Constructor.
 	 * Constructs a basic MDP
 	 * (the one described in Chapter 17 of Russell & Norvig)
@@ -74,6 +86,7 @@ public class MarkovDecisionProblem {
 		width = 4;
 		height = 3;
 		
+		policyActions = new Action[width][height];
 		// Make and fill the fields:
 		landscape = new Field[width][height];
 		for (int i = 0; i < height; i++)
@@ -131,7 +144,7 @@ public class MarkovDecisionProblem {
 
 		terminated = false;
 		
-		waittime = 500;
+		waittime = 1;
 		showProgress = true;
 		
 		actionsCounter = 0;
@@ -163,6 +176,7 @@ public class MarkovDecisionProblem {
 		}
 		actionsCounter++;
 		pDrawMDP();
+		//System.out.println("getReward() in performAction");
 		return getReward();
 	}
 	
@@ -204,7 +218,7 @@ public class MarkovDecisionProblem {
 			yPosition--;
 	}
 	
-	/**
+	/**d1
 	 * Moves the agent left (if possible).
 	 */
 	private void moveLeft(){
@@ -240,6 +254,31 @@ public class MarkovDecisionProblem {
 		if (terminated) return 0;
 		
 		switch(landscape[xPosition][yPosition]){
+		case EMPTY:
+			return noReward;
+		case REWARD:
+			terminated = true;
+			return posReward;
+		case NEGREWARD:
+			terminated = true;
+			return negReward;
+		}
+		
+		// If something went wrong:
+		System.err.println("ERROR: MDP: getReward(): agent is not in an empty, reward or negreward field...");
+		return 0;
+	}
+	
+	/**
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public double getReward(int x, int y) {
+		if (terminated) return 0;
+		
+		switch(landscape[x][y]){
 		case EMPTY:
 			return noReward;
 		case REWARD:
@@ -368,7 +407,7 @@ public class MarkovDecisionProblem {
 	 * Returns the y-position of the current state
 	 * @return a number between 1 and height
 	 */
-	public int getStateYPostion(){
+	public int getStateYPosition(){
 		return yPosition;
 	}
 	
@@ -483,6 +522,38 @@ public class MarkovDecisionProblem {
 	 */
 	public void setShowProgress(boolean show){
 		showProgress = show;
+	}
+	
+	public void addPolicy(Action[][] policy) {
+		for (int i = 0; i < getWidth(); i++) {
+			for (int j = 0; j < getHeight(); j++) {
+				policyActions[i][j] = policy[i][j];
+			}
+		}
+	}
+	
+	public Action getPolicyAction(int i, int j) {
+		return policyActions[i][j];
+	}
+	
+	public double getActionChance() {
+		return pPerform;
+	}
+
+	public double getpPerform() {
+		return pPerform;
+	}
+
+	public double getpSidestep() {
+		return pSidestep;
+	}
+
+	public double getpBackstep() {
+		return pBackstep;
+	}
+
+	public double getpNoStep() {
+		return pNoStep;
 	}
 	
 }

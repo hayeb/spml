@@ -14,22 +14,12 @@ public class Main {
 	public static void main(String[] args) {
 		MarkovDecisionProblem mdp = new MarkovDecisionProblem();
 		mdp.setInitialState(0, 0);
-		for (int i = 0; i < 15; i++){
-			mdp.performAction(Action.UP);
-			mdp.performAction(Action.UP);
-			mdp.performAction(Action.RIGHT);
-			mdp.performAction(Action.RIGHT);
-			mdp.performAction(Action.RIGHT);
-			//mdp.restart();
-		}
+		ValueIIterationLearner learner = new ValueIIterationLearner(mdp);
+		learner.generatePolicy();
 		
-		MarkovDecisionProblem mdp2 = new MarkovDecisionProblem(10, 10);
-		mdp2.setField(5, 5, Field.REWARD);
-		for (int i = 0; i < 100; i++){
-			mdp2.performAction(Action.UP);
-			mdp2.performAction(Action.RIGHT);
-			mdp2.performAction(Action.DOWN);
-			mdp2.performAction(Action.LEFT);
-		}
+		
+//		MarkovDecisionProblem mdp2 = new MarkovDecisionProblem(10, 10);
+//		mdp2.setField(5, 5, Field.REWARD);
+		
 	}
 }

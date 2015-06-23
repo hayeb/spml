@@ -556,4 +556,8 @@ public class MarkovDecisionProblem {
 		return pNoStep;
 	}
 	
+	public void setTerminated(boolean state) {
+		terminated = state;
+	}
+	
 }

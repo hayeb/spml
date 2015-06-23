@@ -1,38 +1,31 @@
 package nl.ru.ai.vroon.mdp;
 
 /**
- * Artificial Intelligence: Search, Planning and Machine Learning
- * Task 4: deadline 24/06/15
+ * Artificial Intelligence: Search, Planning and Machine Learning Task 4:
+ * deadline 24/06/15
  * 
  * @author Haye Bohm -- s4290402
- * @author Wesley van Hoorn -- s4018044 
+ * @author Wesley van Hoorn -- s4018044
  */
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
 
 public class ValueIIterationLearner {
 
 	private MarkovDecisionProblem mdp;
 	private final double discount_rate = 0.9;
-	private final double q0 = 0.0, v0 = 0.0;
-	private int k = 0;
 	private double[][][] qvalues;
 	private double[][] vvalues;
 	private double[][] next_vvalues;
-	
-	private double error_boundary = 0.01;
+
+	private double error_boundary = 1;
 
 	public ValueIIterationLearner(MarkovDecisionProblem mdp) {
 		this.mdp = mdp;
+		mdp.setNegReward(Double.MIN_VALUE);
 		mdp.setDeterministic();
-		qvalues = new double[mdp.getWidth()][mdp.getHeight()][Action.values().length];
+		qvalues = new double[mdp.getWidth()][mdp.getHeight()][Action
+				.values().length];
 		vvalues = new double[mdp.getWidth()][mdp.getHeight()];
 		next_vvalues = new double[mdp.getWidth()][mdp.getHeight()];
-		vInit();
 		setGoalPosition();
 	}
 
@@ -42,16 +35,16 @@ public class ValueIIterationLearner {
 			this.next_vvalues = vUpdate();
 			System.out.println("Error: " + calculateError());
 			if (calculateError() < error_boundary) {
-				mdp.addPolicy(getPolicy());
-				mdp.setPolicyAdded(true);
-				mdp.drawMDP();
 				break;
 			}
 			setVValues();
 		}
+		mdp.addPolicy(getPolicy());
+		mdp.setPolicyAdded(true);
+		mdp.drawMDP();
 		System.out.println("I HAVE FOUND THE SOLUTION");
 	}
-	
+
 	private Action[][] getPolicy() {
 		Action[][] policy = new Action[mdp.getWidth()][mdp.getHeight()];
 		for (int i = 0; i < mdp.getWidth(); i++) {
@@ -59,8 +52,10 @@ public class ValueIIterationLearner {
 				double max = Double.MIN_VALUE;
 				Action maxaction = null;
 				for (int h = 0; h < Action.values().length; h++) {
-					System.out.println("Max: " + qvalues[i][j][h]);
-					if (Double.compare(qvalues[i][j][h], max) <= 0) {
+					System.out.println("Max: "
+							+ qvalues[i][j][h]);
+					if (Double.compare(qvalues[i][j][h],
+							max) < 0) {
 						max = qvalues[i][j][h];
 						maxaction = Action.values()[h];
 					}
@@ -70,7 +65,7 @@ public class ValueIIterationLearner {
 		}
 		return policy;
 	}
-	
+
 	private void setVValues() {
 		for (int i = 0; i < mdp.getWidth(); i++) {
 			for (int j = 0; j < mdp.getHeight(); j++) {
@@ -81,28 +76,18 @@ public class ValueIIterationLearner {
 		}
 	}
 
-	
 	private double calculateError() {
 		double error = 0.0;
 		for (int i = 0; i < mdp.getWidth(); i++) {
 			for (int j = 0; j < mdp.getHeight(); j++) {
-				System.out.println(Math.abs(next_vvalues[i][j] - vvalues[i][j]));
-				error += Math.abs(next_vvalues[i][j] - vvalues[i][j]);
+				System.out.println(Math.abs(next_vvalues[i][j]
+						- vvalues[i][j]));
+				error += Math.abs(next_vvalues[i][j]
+						- vvalues[i][j]);
 			}
 		}
-		
-		
+
 		return error / mdp.getWidth() * mdp.getHeight();
-	}
-	/**
-	 * Initialize the V values to 0.
-	 */
-	private void vInit() {
-		for (int i = 0; i < mdp.getWidth(); i++) {
-			for (int j = 0; j < mdp.getHeight(); j++) {
-				vvalues[i][j] = 0.0;
-			}
-		}
 	}
 
 	/**
@@ -130,43 +115,67 @@ public class ValueIIterationLearner {
 	private double[][][] qUpdate() {
 		for (int i = 0; i < mdp.getWidth(); i++) {
 			for (int j = 0; j < mdp.getHeight(); j++) {
+				// Set the mdp to the desired state..
 				mdp.setState(i, j);
-				if (mdp.getField(i, j) == Field.OBSTACLE || mdp.getField(i, j) == Field.OUTOFBOUNDS) {
+
+				// If the current field we're looking at is out
+				// of bounds or an obstacle, don't do anything.
+				if (mdp.getField(i, j) == Field.OBSTACLE
+						|| mdp.getField(i, j) == Field.OUTOFBOUNDS) {
 					break;
+				} else if (mdp.getField(i, j) == Field.NEGREWARD) {
+					qvalues[i][j] = new double[] {
+							Integer.MIN_VALUE,
+							Integer.MIN_VALUE,
+							Integer.MIN_VALUE,
+							Integer.MIN_VALUE };
 				}
+
+				// For every action possible in this state...
 				for (Action a : Action.values()) {
-					Action b1 = Action.nextAction(a);
-					Action b2 = Action.previousAction(a);
-					Action b3 = Action.backAction(a);
+					double utility = 0.0;
+					Action[] actionlist = {
+							a,
+							Action.nextAction(a),
+							Action.previousAction(a),
+							Action.backAction(a) };
 
-					// Intended action
-					System.out.println("Performing action a: " + a + " in " + i + "," + j);
-					double R = mdp.performAction(a);
-					double V = vvalues[mdp.getStateXPosition()][mdp
-							.getStateYPosition()];
-					mdp.setState(i, j);
-					System.out.println("Performing action b1: " + b1 + " in " + i + "," + j);
-					double R1 = mdp.performAction(b1);
-					double V1 = vvalues[mdp.getStateXPosition()][mdp
-							.getStateYPosition()];
-					mdp.setState(i, j);
-					System.out.println("Performing action b2:" + b2 + " in " + i + "," + j);
-					double R2 = mdp.performAction(b2);
-					double V2 = vvalues[mdp.getStateXPosition()][mdp
-							.getStateYPosition()];
-					mdp.setState(i, j);
-					System.out.println("Performing action b3: " + b3 + " in " + i + "," + j);
-					double R3 = mdp.performAction(b3);
-					double V3 = vvalues[mdp.getStateXPosition()][mdp
-							.getStateYPosition()];
+					// Calculate the possible outcomes of
+					// the action, sum it together and add
+					// that ad the value of the current
+					// action.
+					for (Action act : actionlist) {
+						double R = mdp.performAction(act);
+						mdp.setTerminated(false);
+						System.out.print("R( " + mdp.getStateXPosition()+ "," + mdp.getStateYPosition() + "): " + R + ",\ndoing action: " + act + "\n");
+						double V = 0.0;
+						if (!(mdp.getStateXPosition() == i && mdp
+								.getStateYPosition() == j)) {
+							V = vvalues[mdp.getStateXPosition()][mdp
+									.getStateYPosition()];
+						}
 
-					// Sum all the rewards of the action, and it's stochastic side effects together.
-					qvalues[i][j][a.ordinal()] = mdp.getpPerform()
-							* (R + discount_rate * V) + mdp.getpSidestep()
-							* (R1 + discount_rate * V1) + mdp.getpSidestep()
-							* (R2 + discount_rate * V2) + mdp.getpBackstep()
-							* (R3 + discount_rate * V3);
-
+						if (Action.nextAction(a) == act) {
+							utility += mdp.getpSidestep()
+									* (R + discount_rate
+											* V);
+						} else if (Action
+								.previousAction(a) == act) {
+							utility += mdp.getpSidestep()
+									* (R + discount_rate
+											* V);
+						} else if (Action.backAction(a) == act) {
+							utility += mdp.getpBackstep()
+									* (R + discount_rate
+											* V);
+						} else {
+							utility += mdp.getpPerform()
+									* (R + discount_rate
+											* V);
+						}
+						mdp.setState(i, j);
+					}
+					qvalues[i][j][a.ordinal()] = utility;
 				}
 			}
 		}
@@ -174,15 +183,14 @@ public class ValueIIterationLearner {
 	}
 
 	/**
-	 * Computes the new value function for all states.
+	 * Computes the new values for all states.
 	 * 
 	 * @return vvalues
 	 */
-	private double[][] vUpdate() {		
+	private double[][] vUpdate() {
 		for (int i = 0; i < mdp.getWidth(); i++) {
 			for (int j = 0; j < mdp.getHeight(); j++) {
 				if (!(mdp.getField(i, j) == Field.REWARD)) {
-					List b = Arrays.asList(qvalues[i][j]);
 					double max = Integer.MIN_VALUE;
 					for (int h = 0; h < Action.values().length; h++) {
 						if (qvalues[i][j][h] > max) {
@@ -195,18 +203,5 @@ public class ValueIIterationLearner {
 
 		}
 		return next_vvalues;
-	}
-
-	/**
-	 * 
-	 * @param x
-	 *            coordinate of the new state
-	 * @param y
-	 *            coordinate of the new state
-	 * @return FALSE when the agent has changed coordinates, TRUE when the agent
-	 *         has not moved.
-	 */
-	private boolean haveMoved(int x, int y) {
-		return !(x == mdp.getStateXPosition() && y == mdp.getStateYPosition());
 	}
 }

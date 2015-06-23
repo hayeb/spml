@@ -1,5 +1,7 @@
 package nl.ru.ai.vroon.mdp;
 
+import java.util.Random;
+
 /**
  * Enumerates the actions possible within a MDP
  * @author Jered Vroon
@@ -51,5 +53,11 @@ public enum Action {
 			return LEFT;
 		}
 		return null;
+	}
+	
+	public static Action randomAction(){
+		Random random = new Random();
+		return Action.values()[random.nextInt(4)];
+		
 	}
 }

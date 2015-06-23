@@ -18,6 +18,7 @@ public class MarkovDecisionProblem {
 	
 	// The collection of grid positions that can be visited:
 	private Field[][] landscape;
+	private Action[][] policies;
 	private int width = 4,
 				height = 3;
 	
@@ -36,16 +37,16 @@ public class MarkovDecisionProblem {
 	// Random number generator for doing the Actions stochastically:
 	private static Random rand = new Random();
 	// ... and the probabilities for each (mis)interpretation of each Action:
-	private double 	pPerform = 0.8, 	// probability of action being executed as planned 
+	public double 	pPerform = 0.8, 	// probability of action being executed as planned 
 					pSidestep = 0.2,	// probability of a sidestep being executed
 					pBackstep = 0,		// probability of the inverse action being executed
 					pNoStep = 0;		// probability of no action being executed 
 						// These four probabilities should add up to 1
 	
 	// The rewards given for each state:
-	private double 	posReward = 1,		// reward for positive end state
-					negReward = -1,		// reward for negative end state
-					noReward = -0.04;	// reward for the other states
+	private double 	posReward = -1000,		// reward for positive end state
+					negReward = 1000,		// reward for negative end state
+					noReward = -1000;	// reward for the other states
 	
 	// Boolean maintaining if an end state has been reached:
 	private boolean terminated = false;
@@ -59,23 +60,11 @@ public class MarkovDecisionProblem {
 	// Counts the number of actions that has been performed
 	private int actionsCounter = 0;
 	
-	// Add a list for policy actions
-	 private Action[][] policyActions;
-	 private boolean policyAdded = false;
-	
 	/////////////////////////////////////////////////////////
 	/// FUNCTIONS
 	/////////////////////////////////////////////////////////
 	
-	public boolean isPolicyAdded() {
-		return policyAdded;
-	}
-
-	public void setPolicyAdded(boolean policyAdded) {
-		this.policyAdded = policyAdded;
-	}
-
-	/**d1
+	/**
 	 * Constructor.
 	 * Constructs a basic MDP
 	 * (the one described in Chapter 17 of Russell & Norvig)
@@ -86,12 +75,14 @@ public class MarkovDecisionProblem {
 		width = 4;
 		height = 3;
 		
-		policyActions = new Action[width][height];
 		// Make and fill the fields:
 		landscape = new Field[width][height];
+		policies = new Action[width][height];
 		for (int i = 0; i < height; i++)
-			for (int j = 0; j < width; j++)
+			for (int j = 0; j < width; j++){
 				landscape[j][i] = Field.EMPTY;
+				policies[j][i] = Action.DOWN;
+			}
 		setField(1,1,Field.OBSTACLE);
 		setField(3,1,Field.NEGREWARD);
 		setField(3,2,Field.REWARD);
@@ -116,9 +107,11 @@ public class MarkovDecisionProblem {
 		// Make and fill the fields:
 		landscape = new Field[this.width][this.height];
 		for (int i = 0; i < this.height; i++)
-			for (int j = 0; j < this.width; j++)
+			for (int j = 0; j < this.width; j++){
 				landscape[j][i] = Field.EMPTY;
+			}
 		pDrawMDP();
+		setField(width-1,height-1,Field.REWARD);
 	}
 	
 	/**
@@ -138,13 +131,13 @@ public class MarkovDecisionProblem {
 		pBackstep = 0;
 		pNoStep = 0;
 
-		posReward = 1;
-		negReward = -1;	
+		posReward = 1000;
+		negReward = -1000;	
 		noReward = -0.04;
 
 		terminated = false;
 		
-		waittime = 1;
+		waittime = 500;
 		showProgress = true;
 		
 		actionsCounter = 0;
@@ -176,7 +169,6 @@ public class MarkovDecisionProblem {
 		}
 		actionsCounter++;
 		pDrawMDP();
-		//System.out.println("getReward() in performAction");
 		return getReward();
 	}
 	
@@ -218,7 +210,7 @@ public class MarkovDecisionProblem {
 			yPosition--;
 	}
 	
-	/**d1
+	/**
 	 * Moves the agent left (if possible).
 	 */
 	private void moveLeft(){
@@ -250,35 +242,10 @@ public class MarkovDecisionProblem {
 	 * @return a double (can be negative)
 	 */
 	public double getReward(){
-		// If we are terminated, no rewards can be gained anymore (i.e. every action is futile):
-		if (terminated) return 0;
+		
+		
 		
 		switch(landscape[xPosition][yPosition]){
-		case EMPTY:
-			return noReward;
-		case REWARD:
-			terminated = true;
-			return posReward;
-		case NEGREWARD:
-			terminated = true;
-			return negReward;
-		}
-		
-		// If something went wrong:
-		System.err.println("ERROR: MDP: getReward(): agent is not in an empty, reward or negreward field...");
-		return 0;
-	}
-	
-	/**
-	 * 
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-	public double getReward(int x, int y) {
-		if (terminated) return 0;
-		
-		switch(landscape[x][y]){
 		case EMPTY:
 			return noReward;
 		case REWARD:
@@ -407,7 +374,7 @@ public class MarkovDecisionProblem {
 	 * Returns the y-position of the current state
 	 * @return a number between 1 and height
 	 */
-	public int getStateYPosition(){
+	public int getStateYPostion(){
 		return yPosition;
 	}
 	
@@ -461,7 +428,7 @@ public class MarkovDecisionProblem {
 		if (xpos >= 0 && xpos < width && ypos >= 0 && ypos < height)
 			return landscape[xpos][ypos];
 		else{
-			System.err.println("ERROR:MDP:getField:you request a field that does not exist!");
+			//System.err.println("ERROR:MDP:getField:you request a field that does not exist!");
 			return Field.OUTOFBOUNDS;
 		}
 	}
@@ -523,41 +490,18 @@ public class MarkovDecisionProblem {
 	public void setShowProgress(boolean show){
 		showProgress = show;
 	}
+
+	public void setPolicies(Action[][] policies) {
+		this.policies = policies;
+	}
 	
-	public void addPolicy(Action[][] policy) {
-		for (int i = 0; i < getWidth(); i++) {
-			for (int j = 0; j < getHeight(); j++) {
-				policyActions[i][j] = policy[i][j];
-			}
+	public Action getPolicy(int x, int y){
+		if (x >= 0 && x < width && y >= 0 && y < height)
+			return policies[x][y];
+		else{
+			return null;
 		}
 	}
-	
-	public Action getPolicyAction(int i, int j) {
-		return policyActions[i][j];
-	}
-	
-	public double getActionChance() {
-		return pPerform;
-	}
 
-	public double getpPerform() {
-		return pPerform;
-	}
-
-	public double getpSidestep() {
-		return pSidestep;
-	}
-
-	public double getpBackstep() {
-		return pBackstep;
-	}
-
-	public double getpNoStep() {
-		return pNoStep;
-	}
-	
-	public void setTerminated(boolean state) {
-		terminated = state;
-	}
 	
 }

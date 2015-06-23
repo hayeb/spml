@@ -14,12 +14,15 @@ public class Main {
 	public static void main(String[] args) {
 		MarkovDecisionProblem mdp = new MarkovDecisionProblem();
 		mdp.setInitialState(0, 0);
-		ValueIIterationLearner learner = new ValueIIterationLearner(mdp);
-		learner.generatePolicy();
 		
+		ValueIterator VI = new ValueIterator(mdp);
+		VI.generatePolicies();
 		
-//		MarkovDecisionProblem mdp2 = new MarkovDecisionProblem(10, 10);
-//		mdp2.setField(5, 5, Field.REWARD);
+		/*
+		QLearner qlearner= new QLearner(mdp);
+		qlearner.start();
+		*/
+		
 		
 	}
 }

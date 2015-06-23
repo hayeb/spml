@@ -17,8 +17,8 @@ public class ValueIterator {
 		Vvalues = new double[mdp.getWidth()][mdp.getHeight()];
 		setDefaultZeroQ();
 		setDefaultZeroV();
-		gamma = 0.9;
-		maxIterationDelta = 0.005; // default epsilon.
+		gamma = 0.5;
+		maxIterationDelta = 0.05; // default epsilon.
 	}
 	
 	public void generatePolicies(){

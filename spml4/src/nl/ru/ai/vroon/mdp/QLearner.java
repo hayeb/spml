@@ -1,26 +1,30 @@
 package nl.ru.ai.vroon.mdp;
 
 import java.util.Arrays;
+import java.util.Random;
 
 public class QLearner {
 	private MarkovDecisionProblem mdp;
 	private double[][][] Qvalues;
 	private double learnRate;
 	private double gamma;
+	private double temperature;
 
 	public QLearner(MarkovDecisionProblem mdp) {
 		this.mdp = mdp;
-		mdp.setWaittime(20);
+		mdp.setWaittime(100);
 		Qvalues = new double[mdp.getWidth()][mdp.getHeight()][4];
 		setDefaultZeroQ();
-		double learnRate = 0.7;
-		double gamma = 0.7;
+		learnRate = 0.7;
+		gamma = 0.7;
+		double temperature = 100;
 	}
 	
 	public void start(){
 		mdp.restart();
 		int xpos = mdp.getStateXPosition();
 		int ypos = mdp.getStateYPostion();
+		int goalcount = 0;
 		while(true){
 			Action a = chooseAction(xpos, ypos);
 			mdp.performAction(a);
@@ -33,6 +37,8 @@ public class QLearner {
 				mdp.restart();
 				xpos = mdp.getStateXPosition();
 				ypos = mdp.getStateYPostion();
+				System.out.println("goal" + goalcount++);
+				temperature--;
 			}
 		}
 	}
@@ -56,10 +62,15 @@ public class QLearner {
 	}
 	
 	private Action chooseAction(int xpos, int ypos){
+		Random random = new Random();
 		if(Qvalues[xpos][ypos][0] == Qvalues[xpos][ypos][1] && Qvalues[xpos][ypos][1] == Qvalues[xpos][ypos][2] && Qvalues[xpos][ypos][2] == Qvalues[xpos][ypos][3]){
 			return Action.randomAction();
 		}
 		else{
+			double totalSumQ = 0;
+			for(int i = 0; i < 4; i++)
+				totalSumQ += Math.pow(Math.E, (Qvalues[xpos][ypos][i]/temperature));
+			
 			Action bestAction = Action.values()[0];
 			if(Qvalues[xpos][ypos][0] < Qvalues[xpos][ypos][1]){
 				bestAction = Action.values()[1];
@@ -70,13 +81,18 @@ public class QLearner {
 			if(Qvalues[xpos][ypos][0] < Qvalues[xpos][ypos][1] && Qvalues[xpos][ypos][1] < Qvalues[xpos][ypos][2] && Qvalues[xpos][ypos][2] < Qvalues[xpos][ypos][3]){
 				bestAction = Action.values()[3];
 			}
-			return bestAction;
+			double chance = (Math.pow(Math.E, Qvalues[xpos][ypos][bestAction.ordinal()]/temperature)) / totalSumQ;
+			double randomDouble = random.nextDouble();
+			if(randomDouble < chance){
+				return Action.randomAction();
+			}
+			else return bestAction;
 		}
 			
 	}
 	
 	private double newQvalue(int oldxpos, int oldypos, int xpos, int ypos, Action a){
-		return Qvalues[oldxpos][oldypos][a.ordinal()] + learnRate*(mdp.getReward() + (gamma*bestValue(xpos, ypos)) - Qvalues[oldxpos][oldypos][a.ordinal()]);
+			return (Qvalues[oldxpos][oldypos][a.ordinal()] + learnRate*(mdp.getReward() + (gamma*bestValue(xpos, ypos)) - Qvalues[oldxpos][oldypos][a.ordinal()]));
 		
 	}
 	

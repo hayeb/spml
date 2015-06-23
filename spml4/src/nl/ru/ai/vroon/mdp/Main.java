@@ -12,17 +12,15 @@ public class Main {
 	 * @param args, not used
 	 */
 	public static void main(String[] args) {
-		MarkovDecisionProblem mdp = new MarkovDecisionProblem();
+		MarkovDecisionProblem mdp = new MarkovDecisionProblem(5, 5);
 		mdp.setInitialState(0, 0);
 		
-		ValueIterator VI = new ValueIterator(mdp);
-		VI.generatePolicies();
+//		ValueIterator VI = new ValueIterator(mdp);
+//		VI.generatePolicies();
 		
-		/*
+		
 		QLearner qlearner= new QLearner(mdp);
-		qlearner.start();
-		*/
-		
+		qlearner.start();	
 		
 	}
 }

@@ -1,7 +1,6 @@
 package spml3;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class BeliefNetwork {
 
@@ -32,16 +31,12 @@ public class BeliefNetwork {
 	 *            The name of the node of which you want to calculate the
 	 *            probability.
 	 * @param parents
-	 *            A list of parent and their state, i.e.: <code> <br> <ul>
-	 * 				    [0] = not VariableOne <br>
-	 * 				    [1] = VariableTwo <br>
-	 * 				    [2] = not VariableThree <br>
-	 * 					</ul>
-	 * 					</code>
+	 * The parents of the node. Should be of the following format: <code><br>
+	 * <ul>"parentOne TRUE, parentTwo FALSE, parentThree TRUE"<ul></code>
 	 * @return the probability of nodeName being true given the parent in the
 	 *         list.
 	 */
-	public double calcProbability(String nodeName, List<String> parents) {
+	public double calcProbability(String nodeName, String parents) {
 		return calcStrategy.calculateProbability(nodeName, parents);
 	}
 }

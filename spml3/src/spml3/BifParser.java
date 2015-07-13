@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -144,6 +145,12 @@ public class BifParser {
 		
 		for (int i = 1; i < lines.length - 1; i++) {
 			String current = lines[i];
+			if (current.contains("table")) {
+				Scanner s = new Scanner(current);
+				node.addProbability("", s.nextFloat());
+			} else {
+				
+			}
 		}
 		
 	}

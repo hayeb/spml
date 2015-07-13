@@ -23,26 +23,31 @@ public class BeliefNode {
 	}
 
 	/**
-	 * Adds a probability to the node. The query should consists of the parents of this node.
+	 * Adds a probability to the node. The query should consists of the parents
+	 * of this node.
 	 * 
 	 * @param query
-	 * The parents of the node. Should be of the following format: <code><br>
+	 *            The parents of the node. Should be of the following format:
+	 *            <code><br>
 	 * <ul>"parentOne TRUE, parentTwo FALSE, parentThree TRUE"<ul></code>
 	 * @param probability
 	 */
 	public void addProbability(String query, double probability) {
 		probabilities.put(query, probability);
 	}
-	
+
 	public void addParent(String p) {
 		parents.add(p);
 	}
 
 	/**
 	 * Retrieves a probability from this node.
-	 * @param query 
-	 * The parents of the node. Should be of the following format: <code><br>
-	 * <ul>"parentOne TRUE, parentTwo FALSE, parentThree TRUE"<ul></code>
+	 * 
+	 * @param query
+	 *            The parents of the node. Should be of the following format:
+	 *            <code><br>
+	 * <ul>"parentOne TRUE, parentTwo FALSE, parentThree TRUE"<ul></code> Should
+	 *            be empty if the node has no parents.
 	 * @return
 	 */
 	public double getProbability(String query) {
@@ -51,6 +56,7 @@ public class BeliefNode {
 
 	/**
 	 * Returns the name of this node
+	 * 
 	 * @return
 	 */
 	public String getName() {

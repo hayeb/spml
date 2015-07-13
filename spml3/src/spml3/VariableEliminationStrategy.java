@@ -28,8 +28,22 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 
 	@Override
 	public double calculateProbability(String nodeName, String parents) {
-		// TODO Auto-generated method stub
+		if(!isInEliminationOrdering(nodeName))
+			return 1;
 		return 0;
+	}
+	
+	/**
+	 * Checks the EO for possible error.
+	 * @param nodeName
+	 * @return
+	 */
+	public boolean isInEliminationOrdering(String nodeName){
+		for(BeliefNode beliefnode : eliminationOrdering){
+			if(beliefnode.getName().equals(nodeName))
+				return true;
+		}
+		return false;
 	}
 
 }

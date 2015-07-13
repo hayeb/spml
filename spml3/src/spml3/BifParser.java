@@ -2,7 +2,6 @@ package spml3;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,10 +30,11 @@ public class BifParser {
 		BeliefNetwork bn = new BeliefNetwork() ;
 		for (String name : names) {
 			BeliefNode bnode = new BeliefNode(findName(name));
-			
+			addProbabilities(bnode, probabilities);
+			bn.addNode(bnode);
 		}
 		
-		return null;
+		return bn;
 	}
 	
 	/**
@@ -84,7 +84,7 @@ public class BifParser {
 		Pattern nodeDistribution = Pattern.compile(PROBABILITY_REGEX, flags);		
 		Matcher m2 = nodeDistribution.matcher(contents);
 		while (m2.find()) {
-			System.out.println("Found match at character " + m2.start() + "to" + m2.end());
+			System.out.println("Found match at character " + m2.start() + " to " + m2.end());
 			System.out.print("Contents:\n" + contents.substring(m2.start(), m2.end()) + "\n");
 			probabilities.add(contents.substring(m2.start(), m2.end()));
 		}
@@ -99,5 +99,10 @@ public class BifParser {
 		
 		// Remove some characters from the string
 		return name.substring(m.start() + 9, m.end() - 2);
+	}
+	
+	private void addProbabilities(BeliefNode node, ArrayList<String> probabilities) {
+		
+		
 	}
 }

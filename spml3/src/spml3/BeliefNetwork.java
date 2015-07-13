@@ -13,6 +13,7 @@ public class BeliefNetwork {
 	 */
 	public BeliefNetwork() {
 		calcStrategy = new VariableEliminationStrategy();
+		nodes = new ArrayList<BeliefNode>();
 	}
 
 	/**

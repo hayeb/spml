@@ -6,6 +6,7 @@ import java.util.Map;
 public class BeliefNode {
 
 	private final String name;
+	
 	private Map<String, Double> probabilities;
 
 	/**

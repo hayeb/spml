@@ -12,7 +12,7 @@ public class BeliefNetwork {
 	 * Strategy for calculation probabilities.
 	 */
 	public BeliefNetwork() {
-		calcStrategy = new VariableEliminationStrategy();
+		calcStrategy = new VariableEliminationStrategy(this);
 		nodes = new ArrayList<BeliefNode>();
 	}
 
@@ -40,4 +40,10 @@ public class BeliefNetwork {
 	public double calcProbability(String nodeName, String parents) {
 		return calcStrategy.calculateProbability(nodeName, parents);
 	}
+
+	public ArrayList<BeliefNode> getNodes() {
+		return nodes;
+	}
+	
+	
 }

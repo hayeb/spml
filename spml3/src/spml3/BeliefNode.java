@@ -1,5 +1,6 @@
 package spml3;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ public class BeliefNode {
 
 	private final String name;
 	private Map<String, Double> probabilities;
+	private ArrayList<String> parents;
 
 	/**
 	 * Creates a BeliefNode with given name and a HashMap as data structure to
@@ -17,6 +19,7 @@ public class BeliefNode {
 	public BeliefNode(String name) {
 		this.name = name;
 		probabilities = new HashMap<String, Double>();
+		parents = new ArrayList<String>();
 	}
 
 	/**
@@ -29,6 +32,10 @@ public class BeliefNode {
 	 */
 	public void addProbability(String query, double probability) {
 		probabilities.put(query, probability);
+	}
+	
+	public void addParent(String p) {
+		parents.add(p);
 	}
 
 	/**

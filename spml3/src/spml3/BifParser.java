@@ -2,7 +2,6 @@ package spml3;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,33 +11,36 @@ import java.util.regex.Pattern;
 public class BifParser {
 
 	public BifParser() {
-		
+
 	}
-	
+
 	/**
 	 * Takes a .bif file, and returns a BeliefNetwork with the same structure.
+	 * 
 	 * @param f
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public BeliefNetwork parse(File f) throws IOException {
 		// Fill a String with the contents of the file..
 		String stringContents = readFile(f);
-		
+
 		ArrayList<String> names = fillNames(stringContents);
 		ArrayList<String> probabilities = fillProbabilities(stringContents);
-		
-		BeliefNetwork bn = new BeliefNetwork() ;
+
+		BeliefNetwork bn = new BeliefNetwork();
 		for (String name : names) {
 			BeliefNode bnode = new BeliefNode(findName(name));
-			
+			addProbabilities(bnode, probabilities);
+			bn.addNode(bnode);
 		}
-		
-		return null;
+
+		return bn;
 	}
-	
+
 	/**
 	 * Reads in a file and returns a string representation of it.
+	 * 
 	 * @param f
 	 * @return
 	 * @throws IOException
@@ -52,9 +54,10 @@ public class BifParser {
 		reader.close();
 		return contents.toString();
 	}
-	
+
 	/**
 	 * Fills a list with the name-attributes in the contents string
+	 * 
 	 * @param contents
 	 * @return
 	 */
@@ -71,17 +74,18 @@ public class BifParser {
 		}
 		return names;
 	}
-	
+
 	/**
 	 * Fills a list with the name-attributes in the contents string
+	 * 
 	 * @param contents
 	 * @return
 	 */
 	private ArrayList<String> fillProbabilities(String contents) {
 		ArrayList<String> probabilities = new ArrayList<String>();
-		final String PROBABILITY_REGEX = "^probability.*\\{\\s.*\\s.*\\s\\}";
-		int flags = Pattern.MULTILINE;
-		Pattern nodeDistribution = Pattern.compile(PROBABILITY_REGEX, flags);		
+		final String PROBABILITY_REGEX = "^probability.*?\\{.*?^\\}";
+		int flags = Pattern.MULTILINE | Pattern.DOTALL;
+		Pattern nodeDistribution = Pattern.compile(PROBABILITY_REGEX, flags);
 		Matcher m2 = nodeDistribution.matcher(contents);
 		while (m2.find()) {
 			System.out.println("Found match at character " + m2.start() + "to" + m2.end());
@@ -90,14 +94,57 @@ public class BifParser {
 		}
 		return probabilities;
 	}
-	
+
 	private String findName(String name) {
 		final String pattern = "^variable.*\\{$";
 		Pattern p = Pattern.compile(pattern, Pattern.MULTILINE);
 		Matcher m = p.matcher(name);
 		m.find();
-		
+
 		// Remove some characters from the string
 		return name.substring(m.start() + 9, m.end() - 2);
+	}
+
+	/**
+	 * Finds the correct probability table from the probabilities list.
+	 * 
+	 * @param name
+	 * @return
+	 */
+	private String findProbability(String name, ArrayList<String> probabilities) {
+		final String pattern = "^probability\\s\\(" + name;
+		Pattern p = Pattern.compile(pattern, Pattern.MULTILINE);
+		for (String s : probabilities) {
+			Matcher m = p.matcher(s);
+			if (m.find()) {
+				return s;
+			}
+		}
+		return null;
+	}
+	
+	private void addParents(BeliefNode node, String firstline) {
+		final String pattern = "\\|\\s.*\\)";
+		Pattern p = Pattern.compile(pattern, Pattern.DOTALL | Pattern.MULTILINE);
+		Matcher m = p.matcher(firstline);
+		if (m.find()) {
+			String found = firstline.substring(m.start() + 2, m.end() - 1);
+			String[] parent = found.split(", ");
+			for (String st : parent) {
+				node.addParent(st);
+			}
+		}
+	}
+
+	private void addProbabilities(BeliefNode node, ArrayList<String> probabilities) {
+		String corresponding = findProbability(node.getName(), probabilities);
+		String[] lines = corresponding.split("\n");
+
+		addParents(node, lines[0]);
+		
+		for (int i = 1; i < lines.length - 1; i++) {
+			String current = lines[i];
+		}
+		
 	}
 }

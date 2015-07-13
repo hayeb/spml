@@ -9,6 +9,17 @@ package spml3;
  */
 public class Factor {
 
+	/**
+	 * lijst met nodes
+	 */
 	
+	
+	/**
+	 * lijst met factor verwijderen
+	 */
+	
+	/*
+	 * nieuwe factor aan lijst toevoegen
+	 */
 	
 }

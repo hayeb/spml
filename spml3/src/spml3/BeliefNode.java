@@ -62,4 +62,8 @@ public class BeliefNode {
 	public String getName() {
 		return name;
 	}
+	
+	public int numberOfParents() {
+		return parents.size();
+	}
 }

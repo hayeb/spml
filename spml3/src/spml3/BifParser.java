@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -96,6 +97,13 @@ public class BifParser {
 		return probabilities;
 	}
 
+	/**
+	 * Takes a string with a name attribute form the .bif file and extracts the
+	 * name of the variable.
+	 * 
+	 * @param name
+	 * @return
+	 */
 	private String findName(String name) {
 		final String pattern = "^variable.*\\{$";
 		Pattern p = Pattern.compile(pattern, Pattern.MULTILINE);
@@ -123,34 +131,46 @@ public class BifParser {
 		}
 		return null;
 	}
-	
-	private void addParents(BeliefNode node, String firstline) {
-		final String pattern = "\\|\\s.*\\)";
+
+	private void addParents(BeliefNode node, String probabilityEntry) {
+		final String pattern = "\\|\\s.*\\)\\s\\{";
 		Pattern p = Pattern.compile(pattern, Pattern.DOTALL | Pattern.MULTILINE);
-		Matcher m = p.matcher(firstline);
+		Matcher m = p.matcher(probabilityEntry);
 		if (m.find()) {
-			String found = firstline.substring(m.start() + 2, m.end() - 1);
+			String found = probabilityEntry.substring(m.start()+2, m.end() - 3);
 			String[] parent = found.split(", ");
 			for (String st : parent) {
 				node.addParent(st);
+				// Perhaps store references instead of string names?
 			}
 		}
 	}
 
+	/**
+	 * Finds the corresponding probability table to the node and extracts it.
+	 * @param node
+	 * @param probabilities
+	 */
 	private void addProbabilities(BeliefNode node, ArrayList<String> probabilities) {
 		String corresponding = findProbability(node.getName(), probabilities);
-		String[] lines = corresponding.split("\n");
-
-		addParents(node, lines[0]);
+		addParents(node, corresponding);
 		
-		for (int i = 1; i < lines.length - 1; i++) {
-			String current = lines[i];
-			if (current.contains("table")) {
-				Scanner s = new Scanner(current);
-				node.addProbability("", s.nextFloat());
-			} else {
-				
+		if (node.numberOfParents() == 0) { // Extract the true probability
+			String TABLE_PATTERN = "\\stable\\s\\d\\.\\d{1,}\\,";
+			Pattern p = Pattern.compile(TABLE_PATTERN);
+			Matcher m = p.matcher(corresponding);
+			if (m.find()) {
+				System.out.println("Probability: " + corresponding.substring(m.start() + 7, m.end() - 1));
+				node.addProbability("", Double.parseDouble(corresponding.substring(m.start() + 7, m.end() - 1)));
 			}
+		} else {
+			String ROW_REGEX = "\\([TF][^\\n]*\\;";
+			Pattern p = Pattern.compile(ROW_REGEX, Pattern.DOTALL);
+			Matcher m = p.matcher(corresponding);
+			while (m.find()) {
+				System.out.print("Found a match!\n\n" + corresponding.substring(m.start(), m.end()) + "\n\n");
+			}
+			
 		}
 		
 	}

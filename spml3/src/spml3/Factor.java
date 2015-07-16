@@ -17,10 +17,10 @@ public class Factor {
 	 * heeft een lijst met parents per node : factor
 	 */
 	public Factor(BeliefNode beliefnode) {
-		variableNames = new String[beliefnode.getParentNames().length+1];
+		variableNames = new String[beliefnode.numberOfParents()+1];
 		variableNames[0] = beliefnode.getName();
-		for(int i = 0; i < beliefnode.getParentNames().length; i++){
-			variableNames[i+1] = beliefnode.getParentNames()[i];
+		for(int i = 0; i < beliefnode.numberOfParents(); i++){
+			variableNames[i+1] = beliefnode.getParents().get(i);
 		}
 		
 	}

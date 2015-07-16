@@ -15,8 +15,8 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 	public double calculateProbability(String nodeName, String parents) {
 		if(!isInEliminationOrdering(nodeName))
 			for(BeliefNode beliefnode : eliminationOrdering){
-				Factor[] factorlist
-				Factor newfactor = multiplyFactors(beliefnode);
+				//Factor[] factorlist
+				//Factor newfactor = multiplyFactors(factorlist);
 				//sum out beliefnode variable from newfactor.
 				//remove factors in factorlist from main factorlist.
 				//add newfactor

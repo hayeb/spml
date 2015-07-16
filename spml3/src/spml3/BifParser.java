@@ -36,7 +36,6 @@ public class BifParser {
 			addProbabilities(bnode, probabilities);
 			bn.addNode(bnode);
 		}
-
 		return bn;
 	}
 
@@ -70,8 +69,6 @@ public class BifParser {
 		Pattern nodeName = Pattern.compile(VARIABLE_REGEX, flags);
 		Matcher m1 = nodeName.matcher(contents);
 		while (m1.find()) {
-			System.out.println("Found match at character " + m1.start() + "to" + m1.end());
-			System.out.print("Contents:\n" + contents.substring(m1.start(), m1.end()) + "\n");
 			names.add(contents.substring(m1.start(), m1.end()));
 		}
 		return names;
@@ -90,8 +87,6 @@ public class BifParser {
 		Pattern nodeDistribution = Pattern.compile(PROBABILITY_REGEX, flags);
 		Matcher m2 = nodeDistribution.matcher(contents);
 		while (m2.find()) {
-			System.out.println("Found match at character " + m2.start() + "to" + m2.end());
-			System.out.print("Contents:\n" + contents.substring(m2.start(), m2.end()) + "\n");
 			probabilities.add(contents.substring(m2.start(), m2.end()));
 		}
 		return probabilities;
@@ -160,15 +155,28 @@ public class BifParser {
 			Pattern p = Pattern.compile(TABLE_PATTERN);
 			Matcher m = p.matcher(corresponding);
 			if (m.find()) {
-				System.out.println("Probability: " + corresponding.substring(m.start() + 7, m.end() - 1));
-				node.addProbability("", Double.parseDouble(corresponding.substring(m.start() + 7, m.end() - 1)));
+				node.addProbability(null, Double.parseDouble(corresponding.substring(m.start() + 7, m.end() - 1)));
 			}
 		} else {
 			String ROW_REGEX = "\\([TF][^\\n]*\\;";
 			Pattern p = Pattern.compile(ROW_REGEX, Pattern.DOTALL);
 			Matcher m = p.matcher(corresponding);
 			while (m.find()) {
-				System.out.print("Found a match!\n\n" + corresponding.substring(m.start(), m.end()) + "\n\n");
+				String[] matches = corresponding.substring(m.start(), m.end()).trim().split("[\\(\\)(\\,\\s)]");
+				ArrayList<Boolean> query = new ArrayList<Boolean>();
+				Double d = -1.0;
+				for (String match : matches) {
+					if (!match.isEmpty()) {
+						if (match.equals("T")) {
+							query.add(true);
+						} else if (match.equals("F")) {
+							query.add(false);
+						} else if (match.matches("\\d\\.\\d{1,}") && (d.equals(-1.0))) {
+							d = Double.parseDouble(match);
+						}
+					}
+				}
+				node.addProbability(query, d);
 			}
 			
 		}

@@ -13,6 +13,7 @@ public class BeliefNetwork {
 	 */
 	public BeliefNetwork() {
 		calcStrategy = new VariableEliminationStrategy();
+		nodes = new ArrayList<BeliefNode>();
 	}
 
 	/**
@@ -31,7 +32,8 @@ public class BeliefNetwork {
 	 *            The name of the node of which you want to calculate the
 	 *            probability.
 	 * @param parents
-	 * The parents of the node. Should be of the following format: <code><br>
+	 *            The parents of the node. Should be of the following format:
+	 *            <code><br>
 	 * <ul>"parentOne TRUE, parentTwo FALSE, parentThree TRUE"<ul></code>
 	 * @return the probability of nodeName being true given the parent in the
 	 *         list.
@@ -39,4 +41,9 @@ public class BeliefNetwork {
 	public double calcProbability(String nodeName, String parents) {
 		return calcStrategy.calculateProbability(nodeName, parents);
 	}
+	
+	public ArrayList<BeliefNode> getAllNodes() {
+		return nodes;
+	}
+	
 }

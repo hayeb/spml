@@ -5,19 +5,19 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class BifParser {
+public class BIFParser {
 
-	public BifParser() {
+	public BIFParser() {
 
 	}
 
 	/**
 	 * Takes a .bif file, and returns a BeliefNetwork with the same structure.
+	 * Expects the .bif file to be from AISpace. ONly accepts files which have only boolean variables.
+	 * @author Haye
 	 * 
 	 * @param f
 	 * @return
@@ -75,8 +75,8 @@ public class BifParser {
 	}
 
 	/**
-	 * Fills a list with the name-attributes in the contents string
-	 * 
+	 * Fills a list with the separate name-attributes in the contents string
+	 *  
 	 * @param contents
 	 * @return
 	 */

@@ -27,9 +27,8 @@ public class BeliefNode {
 	 * of this node.
 	 * 
 	 * @param query
-	 *            The parents of the node. Should be of the following format:
-	 *            <code><br>
-	 * <ul>"parentOne TRUE, parentTwo FALSE, parentThree TRUE"<ul></code>
+	 *            The parents of the node. The list of booleans should follow
+	 *            the same ordering as the list of parent in this node.
 	 * @param probability
 	 */
 	public void addProbability(ArrayList<Boolean> query, double probability) {
@@ -44,7 +43,8 @@ public class BeliefNode {
 	 * Retrieves a probability from this node.
 	 * 
 	 * @param query
-	 *            The parents of the node. Should contain boolean variables for the nodes in the same order as the parents list.
+	 *            The parents of the node. The list of booleans should follow
+	 *            the same ordering as the list of parent in this node.
 	 * @return
 	 */
 	public double getProbability(ArrayList<Boolean> query) {
@@ -59,13 +59,17 @@ public class BeliefNode {
 	public String getName() {
 		return name;
 	}
-	
+
+	/**
+	 * 
+	 * @return The number of parents for this node
+	 */
 	public int numberOfParents() {
 		return parents.size();
 	}
-	
+
 	@Override
 	public String toString() {
-		return "Name: " + this.name + "\nParents: " +this.parents + "\nProbabilities" + this.probabilities;
+		return "Name: " + this.name + "\nParents: " + this.parents + "\nProbabilities" + this.probabilities;
 	}
 }

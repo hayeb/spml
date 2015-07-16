@@ -5,13 +5,13 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import spml3.BifParser;
+import spml3.BIFParser;
 
 public class BifParserTest {
 	
 	@Test
 	public void bifParseTest() {
-		BifParser bf = new BifParser();
+		BIFParser bf = new BIFParser();
 		File f = new File("fire.bif");
 		try {
 			bf.parse(f);

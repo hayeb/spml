@@ -22,7 +22,15 @@ public class Factor {
 		for(int i = 0; i < beliefnode.numberOfParents(); i++){
 			variableNames[i+1] = beliefnode.getParents().get(i);
 		}
-		
+	}
+	
+	public void eliminateVariable(String e) {
+		String[] newVN;
+		for (int i =0; i < variableNames.length; i++) {
+			if (variableNames[i] != e) {
+				
+			}
+		}
 	}
 
 	/**

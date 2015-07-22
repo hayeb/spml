@@ -1,8 +1,6 @@
 package spml3;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -43,9 +41,11 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 		if (n != null) {
 			// Create a factor for the query variable
 			Factor q = new Factor(n);
-			ArrayList<String> parents = new ArrayList<String>();
-			Collections.copy(parents, n.getParents());
-			for (String s : parents) {
+			factors.add(q);
+			ArrayList<String> parents = new ArrayList<String>(n.numberOfParents());
+			parents.addAll(n.getParents());
+			for (int i = 0; i < parents.size(); i++) {
+				String s = parents.get(i);
 				BeliefNode parent = beliefnetwork.getNode(s);
 				factors.add(new Factor(parent));
 				parents.addAll(parent.getParents());
@@ -55,12 +55,18 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 			System.err.print("Could not find query node.");
 			System.exit(2);
 		}
+		return;
 		
 	}
 
 	@Override
 	public double calculateProbability(String nodeName, List<Boolean> parents) {
-		return 0;
+		identifyFactors(nodeName);
+		
+		
+		
+		
+		return 0.00;
 	}
 
 	/**

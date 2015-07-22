@@ -46,7 +46,7 @@ public class BeliefNode {
 	 *            The parents of the node. The list of booleans should follow
 	 *            the same ordering as the list of parent in this node.
 	 *            Unobserverd variables should be represented by a null entry in
-	 *            the list. >>>>>>> refs/heads/VariableElimination
+	 *            the list.
 	 * @return
 	 */
 	public double getProbability(ArrayList<Boolean> query) {

@@ -9,10 +9,10 @@ public interface ProbabilityCalculationStrategy {
 	 * 
 	 * @param nodeName
 	 *            The name of the node. WE only support one query variable.
-	 * @param parents
-	 *            The parents of the node. The list of booleans should follow
+	 * @param observer
+	 *            Observer variables in the network. The list of booleans should follow
 	 *            the same ordering as the list of parent in this node.
-	 *            Unobserverd variables should be represented by a null entry in
+	 *            Unobserved variables should be represented by a null entry in
 	 *            the list.
 	 * @return
 	 */

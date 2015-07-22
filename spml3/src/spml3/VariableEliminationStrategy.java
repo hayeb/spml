@@ -36,7 +36,7 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 	}
 
 	private void identifyFactors(String query) {
-		// 1. Try to find the query variable in the network.
+		// Try to find the query variable in the network.
 		BeliefNode n = beliefnetwork.getNode(query);
 		if (n != null) {
 			// Create a factor for the query variable
@@ -51,11 +51,19 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 				parents.addAll(parent.getParents());
 			}
 			
-		} else {
+		} else { // If the query variable can't be found.. 
 			System.err.print("Could not find query node.");
 			System.exit(2);
 		}
 		return;
+		
+	}
+	
+	/**
+	 * Removes the observed factors from the list
+	 */
+	public void reduceObserved(List<Boolean> parents) {
+		
 		
 	}
 

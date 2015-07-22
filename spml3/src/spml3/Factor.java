@@ -12,6 +12,8 @@ import java.util.Map;
 public class Factor {
 	private String[] variableNames;
 	private Map<boolean[], Double> probabilities;
+	
+	private boolean observed;
 
 	/**
 	 * heeft een lijst met parents per node : factor

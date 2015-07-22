@@ -34,6 +34,12 @@ public class Factor {
 			}
 		}
 	}
+	
+	public static Factor multiplyFactor(Factor A, Factor B) {
+		
+		
+		return B;
+	}
 
 //	/**
 //	 * Geeft een lijst met factoren waar de to be eliminated variable voorkomt en verwijdert deze uit de factor lijst

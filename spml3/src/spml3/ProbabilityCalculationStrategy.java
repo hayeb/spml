@@ -8,7 +8,7 @@ public interface ProbabilityCalculationStrategy {
 	 * Returns the probability of nodeName being true, given the parent nodes.
 	 * 
 	 * @param nodeName
-	 *            The name of the node.
+	 *            The name of the node. WE only support one query variable.
 	 * @param parents
 	 *            The parents of the node. The list of booleans should follow
 	 *            the same ordering as the list of parent in this node.

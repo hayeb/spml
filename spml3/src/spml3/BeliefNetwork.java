@@ -27,6 +27,22 @@ public class BeliefNetwork {
 	}
 
 	/**
+	 * Returns the node in the network according to the node name. REturns null
+	 * if the node can't be found.
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public BeliefNode getNode(String name) {
+		for (BeliefNode n : nodes) {
+			if (n.getName().equals(name)) {
+				return n;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Calculates a probability according to the current strategy.
 	 * 
 	 * @param nodeName
@@ -43,7 +59,6 @@ public class BeliefNetwork {
 	public double calcProbability(String nodeName, List<Boolean> query) {
 		return calcStrategy.calculateProbability(nodeName, query);
 	}
-
 
 	public ArrayList<BeliefNode> getNodes() {
 		return nodes;

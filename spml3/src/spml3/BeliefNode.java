@@ -7,8 +7,10 @@ import java.util.Map;
 public class BeliefNode {
 
 	private final String name;
-	private Map<ArrayList<Boolean>, Double> probabilities;
+	//private Map<ArrayList<Boolean>, Double> probabilities;
 	private ArrayList<String> parents;
+	
+	private DataStructuur probabilities;
 
 	/**
 	 * Creates a BeliefNode with given name and a HashMap as data structure to
@@ -18,7 +20,7 @@ public class BeliefNode {
 	 */
 	public BeliefNode(String name) {
 		this.name = name;
-		probabilities = new HashMap<ArrayList<Boolean>, Double>();
+		probabilities = null; // VUL HIER DE IMPLEMENTATIE VAN HET INTERFACE IN
 		parents = new ArrayList<String>();
 	}
 

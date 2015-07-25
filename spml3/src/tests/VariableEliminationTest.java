@@ -6,15 +6,15 @@ import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
 
+import spml3.BIFParser;
 import spml3.BeliefNetwork;
-import spml3.BifParser;
 
 public class VariableEliminationTest {
 	private BeliefNetwork bn;
 
 	@Before
 	public void setUp() throws Exception {
-		BifParser bp = new BifParser();
+		BIFParser bp = new BIFParser();
 		bn = bp.parse(new File("fire.bif"));
 		System.out.print("Setup done.'n");
 	}

@@ -10,13 +10,40 @@ import java.util.regex.Pattern;
 
 public class BIFParser {
 
-	public BIFParser() {
+	/**
+	 * Regular expression for finding a single probability table entry within a probability
+	 * entry.
+	 */
+	private final String TABLE_REGEX = "\\stable\\s\\d\\.\\d{1,}\\,";
+	private Pattern TABLE_PATTERN;
+	
+	private final String ROW_REGEX = "\\([TF][^\\n]*\\;";
+	private Pattern ROW_PATTERN;
 
+	/**
+	 * Regular expression for finding variable entries in the .bif file.
+	 */
+	private final String NAME_REGEX = "\\s\\(.*?(\\)|\\s\\|)";
+	private Pattern NAME_PATTERN;
+
+	/**
+	 * Regular expression for finding probability entries in the .bif file
+	 */
+	private final String PROBABILITY_REGEX = "^probability.*?\\{.*?^\\}";
+	private Pattern PROBABILITY_PATTERN;
+
+	public BIFParser() {
+		TABLE_PATTERN = Pattern.compile(TABLE_REGEX);
+		NAME_PATTERN = Pattern.compile(NAME_REGEX, Pattern.DOTALL);
+		PROBABILITY_PATTERN = Pattern.compile(PROBABILITY_REGEX, Pattern.DOTALL | Pattern.MULTILINE);
+		ROW_PATTERN = Pattern.compile(ROW_REGEX, Pattern.DOTALL);
 	}
 
 	/**
 	 * Takes a .bif file, and returns a BeliefNetwork with the same structure.
-	 * Expects the .bif file to be from AISpace. ONly accepts files which have only boolean variables.
+	 * Expects the .bif file to be from AISpace. ONly accepts files which have
+	 * only boolean variables.
+	 * 
 	 * @author Haye
 	 * 
 	 * @param f
@@ -24,18 +51,9 @@ public class BIFParser {
 	 * @throws IOException
 	 */
 	public BeliefNetwork parse(File f) throws IOException {
-		// Fill a String with the contents of the file..
 		String stringContents = readFile(f);
-
-		ArrayList<String> names = fillNames(stringContents);
-		ArrayList<String> probabilities = fillProbabilities(stringContents);
-
 		BeliefNetwork bn = new BeliefNetwork();
-		for (String name : names) {
-			BeliefNode bnode = new BeliefNode(findName(name));
-			addProbabilities(bnode, probabilities);
-			bn.addNode(bnode);
-		}
+		addNodes(stringContents, bn);
 		return bn;
 	}
 
@@ -56,130 +74,79 @@ public class BIFParser {
 		return contents.toString();
 	}
 
-	/**
-	 * Fills a list with the name-attributes in the contents string
-	 * 
-	 * @param contents
-	 * @return
-	 */
-	private ArrayList<String> fillNames(String contents) {
-		ArrayList<String> names = new ArrayList<String>();
-		final String VARIABLE_REGEX = "^variable.*\\{\\s.*\\s.*\\s\\}";
-		int flags = Pattern.MULTILINE;
-		Pattern nodeName = Pattern.compile(VARIABLE_REGEX, flags);
-		Matcher m1 = nodeName.matcher(contents);
-		while (m1.find()) {
-			names.add(contents.substring(m1.start(), m1.end()));
-		}
-		return names;
-	}
-
-	/**
-	 * Fills a list with the separate name-attributes in the contents string
-	 *  
-	 * @param contents
-	 * @return
-	 */
-	private ArrayList<String> fillProbabilities(String contents) {
-		ArrayList<String> probabilities = new ArrayList<String>();
-		final String PROBABILITY_REGEX = "^probability.*?\\{.*?^\\}";
-		int flags = Pattern.MULTILINE | Pattern.DOTALL;
-		Pattern nodeDistribution = Pattern.compile(PROBABILITY_REGEX, flags);
-		Matcher m2 = nodeDistribution.matcher(contents);
-		while (m2.find()) {
-			probabilities.add(contents.substring(m2.start(), m2.end()));
-		}
-		return probabilities;
-	}
-
-	/**
-	 * Takes a string with a name attribute form the .bif file and extracts the
-	 * name of the variable.
-	 * 
-	 * @param name
-	 * @return
-	 */
-	private String findName(String name) {
-		final String pattern = "^variable.*\\{$";
-		Pattern p = Pattern.compile(pattern, Pattern.MULTILINE);
-		Matcher m = p.matcher(name);
-		m.find();
-
-		// Remove some characters from the string
-		return name.substring(m.start() + 9, m.end() - 2);
-	}
-
-	/**
-	 * Finds the correct probability table from the probabilities list.
-	 * 
-	 * @param name
-	 * @return
-	 */
-	private String findProbability(String name, ArrayList<String> probabilities) {
-		final String pattern = "^probability\\s\\(" + name;
-		Pattern p = Pattern.compile(pattern, Pattern.MULTILINE);
-		for (String s : probabilities) {
-			Matcher m = p.matcher(s);
-			if (m.find()) {
-				return s;
-			}
-		}
-		return null;
-	}
-
 	private void addParents(BeliefNode node, String probabilityEntry) {
 		final String pattern = "\\|\\s.*\\)\\s\\{";
 		Pattern p = Pattern.compile(pattern, Pattern.DOTALL | Pattern.MULTILINE);
 		Matcher m = p.matcher(probabilityEntry);
 		if (m.find()) {
-			String found = probabilityEntry.substring(m.start()+2, m.end() - 3);
+			String found = probabilityEntry.substring(m.start() + 2, m.end() - 3);
 			String[] parent = found.split(", ");
 			for (String st : parent) {
 				node.addParent(st);
-				// Perhaps store references instead of string names?
 			}
+		}
+	}
+	
+	private void addSingleTableEntry(BeliefNode bnode, String entry) {
+		Matcher tableMatcher = TABLE_PATTERN.matcher(entry);
+		if (tableMatcher.find()) {
+			bnode.addProbability(new Pair[0],
+					Double.parseDouble(entry.substring(tableMatcher.start() + 7, tableMatcher.end() - 1)));
+		}
+	}
+	
+	private void addMultipleTableEntries(BeliefNode bnode, String entry, ArrayList<String> names) {
+		Matcher tableMatcher = ROW_PATTERN.matcher(entry);
+		while (tableMatcher.find()) {
+			String row = entry.substring(tableMatcher.start(), tableMatcher.end());
+			row = row.replaceAll("[\\(\\)\\;\\,]", "");
+			System.out.print("Trimmed row: \n" + row + "\n");
+			String[] splitted = row.split("\\s");
+			Pair[] pairs = new Pair[names.size()];
+			int i = 0 ;
+			for (; i < names.size(); i++) {
+				pairs[i] = new Pair(names.get(i), splitted[i]);
+			}
+			bnode.addProbability(pairs, Double.parseDouble(splitted[i]));
+			
 		}
 	}
 
 	/**
-	 * Finds the corresponding probability table to the node and extracts it.
+	 * Finds all probability entries in the .bif file and creates a node for the
+	 * entry.
+	 * 
 	 * @param node
 	 * @param probabilities
 	 */
-	private void addProbabilities(BeliefNode node, ArrayList<String> probabilities) {
-		String corresponding = findProbability(node.getName(), probabilities);
-		addParents(node, corresponding);
-		
-		if (node.numberOfParents() == 0) { // Extract the true probability
-			String TABLE_PATTERN = "\\stable\\s\\d\\.\\d{1,}\\,";
-			Pattern p = Pattern.compile(TABLE_PATTERN);
-			Matcher m = p.matcher(corresponding);
-			if (m.find()) {
-				node.addProbability(null, Double.parseDouble(corresponding.substring(m.start() + 7, m.end() - 1)));
-			}
-		} else {
-			String ROW_REGEX = "\\([TF][^\\n]*\\;";
-			Pattern p = Pattern.compile(ROW_REGEX, Pattern.DOTALL);
-			Matcher m = p.matcher(corresponding);
-			while (m.find()) {
-				String[] matches = corresponding.substring(m.start(), m.end()).trim().split("[\\(\\)(\\,\\s)]");
-				ArrayList<Boolean> query = new ArrayList<Boolean>();
-				Double d = -1.0;
-				for (String match : matches) {
-					if (!match.isEmpty()) {
-						if (match.equals("T")) {
-							query.add(true);
-						} else if (match.equals("F")) {
-							query.add(false);
-						} else if (match.matches("\\d\\.\\d{1,}") && (d.equals(-1.0))) {
-							d = Double.parseDouble(match);
-						}
-					}
+	private void addNodes(String contents, BeliefNetwork bn) {
+		Matcher probMatcher = PROBABILITY_PATTERN.matcher(contents);
+		while (probMatcher.find()) {
+			String entry = contents.substring(probMatcher.start(), probMatcher.end());
+			Matcher nameMatcher= NAME_PATTERN.matcher(entry);
+			if (nameMatcher.find()) {
+				String found = entry.substring(nameMatcher.start(), nameMatcher.end());
+				
+				// get rid of all non alphabet characters
+				String name = found.replaceAll("\\P{L}+", ""); 
+				BeliefNode bnode = new BeliefNode(name);
+				addParents(bnode, entry);
+
+				if (bnode.numberOfParents() == 0) {
+					addSingleTableEntry(bnode, entry);
+				} else {
+					// 1. Extract all variable names.
+					ArrayList<String> names = bnode.getParents();
+					addMultipleTableEntries(bnode, entry, names);
+					
 				}
-				node.addProbability(query, d);
+
+				System.out.print(bnode + "\n\n");
+				bn.addNode(bnode);
+
 			}
-			
+
 		}
-		
+		System.out.println("Done parsing!");
 	}
 }

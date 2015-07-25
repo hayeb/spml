@@ -4,55 +4,44 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BeliefNode {
+public class BeliefNode implements DataStructuur {
 
+	// Name of the node
 	private final String name;
-	//private Map<ArrayList<Boolean>, Double> probabilities;
+	// The list of parents of the node
 	private ArrayList<String> parents;
-	
+	// The data structure containing a probability table.
 	private DataStructuur probabilities;
 
 	/**
-	 * Creates a BeliefNode with given name and a HashMap as data structure to
-	 * store the probabilities.
+	 * Creates a BeliefNode with given name and a ProbabilityMap as data
+	 * structure to store the probabilities.
 	 * 
 	 * @param name
 	 */
 	public BeliefNode(String name) {
 		this.name = name;
-		probabilities = null; // VUL HIER DE IMPLEMENTATIE VAN HET INTERFACE IN
+		probabilities = new ProbabilityMap();
 		parents = new ArrayList<String>();
 	}
 
-	/**
-	 * Adds a probability to the node. The query should consists of the parents
-	 * of this node.
-	 * 
-	 * @param query
-	 *            The parents of the node. The list of booleans should follow
-	 *            the same ordering as the list of parent in this node.
-	 * @param probability
-	 */
-	public void addProbability(ArrayList<Boolean> query, double probability) {
-		probabilities.put(query, probability);
+	
+	@Override
+	public void addProbability(Pair[] query, double probability) {
+		probabilities.addProbability(query, probability);
 	}
 
+	@Override
+	public double getProbability(Pair[] query, Boolean state) {
+		return probabilities.getProbability(query, state);
+	}
+
+	/**
+	 * Adds a parent to the list of parents. Converts to lower case and trims the parent name.
+	 * @param p
+	 */
 	public void addParent(String p) {
-		parents.add(p);
-	}
-
-	/**
-	 * Retrieves a probability from this node.
-	 * 
-	 * @param query
-	 *            The parents of the node. The list of booleans should follow
-	 *            the same ordering as the list of parent in this node.
-	 *            Unobserverd variables should be represented by a null entry in
-	 *            the list.
-	 * @return
-	 */
-	public double getProbability(ArrayList<Boolean> query) {
-		return probabilities.get(query);
+		parents.add(p.toLowerCase().trim());
 	}
 
 	/**
@@ -76,7 +65,11 @@ public class BeliefNode {
 	public String toString() {
 		return "Name: " + this.name + "\nParents: " + this.parents + "\nProbabilities" + this.probabilities;
 	}
-	
+
+	/**
+	 * Returns a list containing all parents.
+	 * @return
+	 */
 	public ArrayList<String> getParents() {
 		return this.parents;
 	}

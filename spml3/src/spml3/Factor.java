@@ -3,15 +3,15 @@
  */
 package spml3;
 
-import java.util.Map;
-
 /**
  * @author mmwvh
  *
  */
 public class Factor {
 	private String[] variableNames;
-	private Map<boolean[], Double> probabilities;
+	
+	// Use this to store the probabilities for this factor.
+	private final DataStructuur probabilities;
 	
 	private boolean observed;
 
@@ -24,6 +24,8 @@ public class Factor {
 		for(int i = 0; i < beliefnode.numberOfParents(); i++){
 			variableNames[i+1] = beliefnode.getParents().get(i);
 		}
+		
+		probabilities = new ProbabilityMap();
 	}
 	
 	public void eliminateVariable(String e) {

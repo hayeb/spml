@@ -15,15 +15,11 @@ public interface DataStructuur {
 	public void addProbability(Pair[] query, double probability);
 
 	/**
-	 * 
-	 * 
-	 * @return the probability of the corresponding row; e.g. The probability of
-	 *         factor A,B,C where !a, !b, c holds.
-	 * 
-	 *         But when I call it with a different Factor I might want a row
-	 *         with corresponding variable states.
-	 * 
-	 *         Thus perhaps I want a list instead.
+	 * Returns a probability of the node being in equal to the state given the query pairs.
+	 * @param query
+	 * 			A list of Pairs representing the query variables.
+	 * @param state
+	 * @return
 	 */
 	public double getProbability(Pair[] query, Boolean state);
 }

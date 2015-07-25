@@ -1,16 +1,22 @@
 package spml3;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class BeliefNode implements DataStructuur {
 
-	// Name of the node
+	/**
+	 * Name of the node
+	 */
 	private final String name;
-	// The list of parents of the node
+
+	/**
+	 * The list of parents of the node
+	 */
 	private ArrayList<String> parents;
-	// The data structure containing a probability table.
+
+	/**
+	 * The data structure containing a probability table.
+	 */
 	private DataStructuur probabilities;
 
 	/**
@@ -18,6 +24,8 @@ public class BeliefNode implements DataStructuur {
 	 * structure to store the probabilities.
 	 * 
 	 * @param name
+	 *            The name of the node. Usually, this is the name of the
+	 *            variable the node represents.
 	 */
 	public BeliefNode(String name) {
 		this.name = name;
@@ -25,7 +33,6 @@ public class BeliefNode implements DataStructuur {
 		parents = new ArrayList<String>();
 	}
 
-	
 	@Override
 	public void addProbability(Pair[] query, double probability) {
 		probabilities.addProbability(query, probability);
@@ -37,7 +44,9 @@ public class BeliefNode implements DataStructuur {
 	}
 
 	/**
-	 * Adds a parent to the list of parents. Converts to lower case and trims the parent name.
+	 * Adds a parent to the list of parents. Converts to lower case and trims
+	 * the parent name.
+	 * 
 	 * @param p
 	 */
 	public void addParent(String p) {
@@ -68,6 +77,7 @@ public class BeliefNode implements DataStructuur {
 
 	/**
 	 * Returns a list containing all parents.
+	 * 
 	 * @return
 	 */
 	public ArrayList<String> getParents() {

@@ -1,20 +1,15 @@
 package spml3;
 
-import java.util.List;
-
 public interface ProbabilityCalculationStrategy {
 
 	/**
-	 * Returns the probability of nodeName being true, given the parent nodes.
+	 * Returns the probability of nodeName being true, given the observed nodes.
 	 * 
 	 * @param nodeName
-	 *            The name of the node. WE only support one query variable.
-	 * @param observer
-	 *            Observer variables in the network. The list of booleans should follow
-	 *            the same ordering as the list of parent in this node.
-	 *            Unobserved variables should be represented by a null entry in
-	 *            the list.
+	 *            The name of the node. We only support one query variable.
+	 * @param observedNodes
+	 *            Observed variables in the network. The list should consist of pairs of the observed variable name and the state of the observed variable
 	 * @return
 	 */
-	public double calculateProbability(String nodeName, List<Boolean> parents);
+	public double calculateProbability(String nodeName, Pair[] observedNodes);
 }

@@ -8,6 +8,11 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 
+ * @author haye
+ *
+ */
 public class BIFParser {
 
 	/**
@@ -32,6 +37,9 @@ public class BIFParser {
 	private final String PROBABILITY_REGEX = "^probability.*?\\{.*?^\\}";
 	private Pattern PROBABILITY_PATTERN;
 
+	/**
+	 * Constructor for the parser.
+	 */
 	public BIFParser() {
 		TABLE_PATTERN = Pattern.compile(TABLE_REGEX);
 		NAME_PATTERN = Pattern.compile(NAME_REGEX, Pattern.DOTALL);
@@ -44,9 +52,8 @@ public class BIFParser {
 	 * Expects the .bif file to be from AISpace. ONly accepts files which have
 	 * only boolean variables.
 	 * 
-	 * @author Haye
-	 * 
 	 * @param f
+	 * 			File from which to parse the .bif file.
 	 * @return
 	 * @throws IOException
 	 */
@@ -74,6 +81,13 @@ public class BIFParser {
 		return contents.toString();
 	}
 
+	/**
+	 * Adds parent to the parameter node from the probability entry. 
+	 * @param node
+	 * 			Node to add the parents to
+	 * @param probabilityEntry
+	 * 			String from which to read the parents from.
+	 */
 	private void addParents(BeliefNode node, String probabilityEntry) {
 		final String pattern = "\\|\\s.*\\)\\s\\{";
 		Pattern p = Pattern.compile(pattern, Pattern.DOTALL | Pattern.MULTILINE);
@@ -87,6 +101,11 @@ public class BIFParser {
 		}
 	}
 	
+	/**
+	 * Adds the probability from a single-row table to the parameter node.
+	 * @param bnode
+	 * @param entry
+	 */
 	private void addSingleTableEntry(BeliefNode bnode, String entry) {
 		Matcher tableMatcher = TABLE_PATTERN.matcher(entry);
 		if (tableMatcher.find()) {
@@ -95,6 +114,12 @@ public class BIFParser {
 		}
 	}
 	
+	/**
+	 * Adds the probabilities from a multi-row table to the parameter node.
+	 * @param bnode
+	 * @param entry
+	 * @param names
+	 */
 	private void addMultipleTableEntries(BeliefNode bnode, String entry, ArrayList<String> names) {
 		Matcher tableMatcher = ROW_PATTERN.matcher(entry);
 		while (tableMatcher.find()) {
@@ -135,17 +160,13 @@ public class BIFParser {
 				if (bnode.numberOfParents() == 0) {
 					addSingleTableEntry(bnode, entry);
 				} else {
-					// 1. Extract all variable names.
+					// Extract all variable names.
 					ArrayList<String> names = bnode.getParents();
 					addMultipleTableEntries(bnode, entry, names);
-					
 				}
-
 				System.out.print(bnode + "\n\n");
 				bn.addNode(bnode);
-
 			}
-
 		}
 		System.out.println("Done parsing!");
 	}

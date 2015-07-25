@@ -68,7 +68,7 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 	}
 
 	@Override
-	public double calculateProbability(String nodeName, List<Boolean> parents) {
+	public double calculateProbability(String nodeName, Pair[] query) {
 		identifyFactors(nodeName);
 		
 		

@@ -1,7 +1,6 @@
 package spml3;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class BeliefNetwork implements ProbabilityCalculationStrategy {
 
@@ -47,7 +46,7 @@ public class BeliefNetwork implements ProbabilityCalculationStrategy {
 	}
 
 	@Override
-	public double calculateProbability(String nodeName, List<Boolean> parents) {
-		return calcStrategy.calculateProbability(nodeName, parents);
+	public double calculateProbability(String nodeName, Pair[] query) {
+		return calcStrategy.calculateProbability(nodeName, query);
 	}
 }

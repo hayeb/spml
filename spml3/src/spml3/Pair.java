@@ -6,7 +6,7 @@ public class Pair implements Comparable<Pair> {
 	private final String state;
 
 	/**
-	 * Constructor to attach a state to a variable name/
+	 * Constructor to attach a state to a variable name.
 	 * 
 	 * @param name
 	 *            The name of the variable. This will be converted to lowercase

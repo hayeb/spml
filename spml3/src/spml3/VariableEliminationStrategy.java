@@ -14,11 +14,21 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 		// Dit moet niet in de constructor denk ik, maar pas na het
 		// identificeren vna de factoren.
 		// eliminationOrdering = generateEliminationOrdering(beliefnetwork);
-		
+
 		this.beliefnetwork = beliefnetwork;
 		factors = new ArrayList<Factor>();
 	}
 
+	/**
+	 * Generated an elimination ordering.
+	 * 
+	 * @param beliefnetwork
+	 * @return
+	 * 
+	 * 		TODO: I propose we generate an ordering according to the number
+	 *         of parents a node has. We eliminate the nodes with a low number
+	 *         of parents first.
+	 */
 	private ArrayList<BeliefNode> generateEliminationOrdering(BeliefNetwork beliefnetwork) {
 		ArrayList<BeliefNode> eliminationordering = new ArrayList<BeliefNode>(beliefnetwork.getNodes().size() - 1);
 		String[] str = new String[8];
@@ -35,6 +45,11 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 		return eliminationordering;
 	}
 
+	/**
+	 * Generate a factor for every node in the network.
+	 * 
+	 * @param query
+	 */
 	private void identifyFactors(String query) {
 		// Try to find the query variable in the network.
 		BeliefNode n = beliefnetwork.getNode(query);
@@ -50,30 +65,26 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 				factors.add(new Factor(parent));
 				parents.addAll(parent.getParents());
 			}
-			
-		} else { // If the query variable can't be found.. 
+
+		} else { // If the query variable can't be found..
 			System.err.print("Could not find query node.");
 			System.exit(2);
 		}
 		return;
-		
+
 	}
-	
+
 	/**
 	 * Removes the observed factors from the list
 	 */
 	public void reduceObserved(List<Boolean> parents) {
-		
-		
+
 	}
 
 	@Override
 	public double calculateProbability(String nodeName, Pair[] query) {
 		identifyFactors(nodeName);
-		
-		
-		
-		
+
 		return 0.00;
 	}
 

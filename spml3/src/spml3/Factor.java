@@ -19,7 +19,8 @@ public class Factor {
 	private boolean observed = false;
 
 	/**
-	 * heeft een lijst met parents per node : factor
+	 * heeft een lijst met parents per node : factor TODO: Improve docs/this
+	 * method
 	 */
 	public Factor(BeliefNode beliefnode) {
 		variableNames = new String[beliefnode.numberOfParents() + 1];
@@ -31,42 +32,17 @@ public class Factor {
 		probabilities = new ProbabilityMap();
 	}
 
-	public void eliminateVariable(String e) {
+	/**
+	 * Iterate over all the entries in the probability table, and remove all
+	 * variables for which the state is not equals to the parameters.
+	 */
+	public void eliminateVariable(String variableName, String state) {
 		String[] newVN;
 		for (int i = 0; i < variableNames.length; i++) {
-			if (variableNames[i] != e) {
+			if (variableNames[i] != variableName) {
 
 			}
 		}
-	}
-
-	public static Factor multiplyFactor(Factor A, Factor B) {
-
-		return B;
-	}
-
-	// /**
-	// * Geeft een lijst met factoren waar de to be eliminated variable voorkomt
-	// en verwijdert deze uit de factor lijst
-	// * @return lijst met probability tabellen die een parent bevat die gelijk
-	// is aan to be eliminated variable
-	// */
-	// public lijst tbMultiplied() {
-	// for alle nodes
-	// for alle parents
-	// gelijk aan to be eliminated variable?
-	// voeg toe aan lijst
-	// verwijder uit factor lijst
-	//
-	// return lijst
-	//
-	// }
-
-	/**
-	 * 
-	 */
-	public void addFactor() {
-
 	}
 
 	public boolean isObserved() {

@@ -1,5 +1,6 @@
 package spml3;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -11,12 +12,21 @@ import java.util.HashMap;
  * @author haye
  *
  */
-public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStructuur {
+public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStructuur, Cloneable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+
+	/**
+	 * The name of the variable where this map belongs to.
+	 */
+	private String variableName;
+	
+	public ProbabilityMap(String name) {
+		this.variableName = name;
+	}
 
 	@Override
 	public void addProbability(Pair[] query, double probability) {
@@ -33,5 +43,41 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 		} else {
 			return 1 - this.get(query);
 		}
+	}
+
+	@Override
+	public void removeObserved(Pair pair) {
+		Pair[][] test = new Pair[this.keySet().size()][];
+		Pair[][] rows = this.keySet().toArray(test);
+		for (Pair[] p : rows) {
+			boolean keep = true;
+			for (int i = 0; i < p.length && keep; i++) {
+				if (p[i].getName() == pair.getName() && p[i].getState() != pair.getState()) {
+					keep = false;
+				}
+			}
+			if (!keep) {
+				this.remove(p);
+			}
+		}
+	}
+
+	public ProbabilityMap cloneMap() {
+		ProbabilityMap map = new ProbabilityMap(variableName);
+		for (Pair[] p : this.keySet()) {
+			map.addProbability(p, this.get(p));
+		}
+		return map;
+	}
+
+	@Override
+	public ArrayList<String> getVariableNames() {
+		Pair[] p = this.keySet().iterator().next();
+		ArrayList<String> names = new ArrayList<String>();
+		names.add(variableName);
+		for (Pair pair : p) {
+			names.add(pair.getName());
+		}
+		return names;
 	}
 }

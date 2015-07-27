@@ -125,7 +125,6 @@ public class BIFParser {
 		while (tableMatcher.find()) {
 			String row = entry.substring(tableMatcher.start(), tableMatcher.end());
 			row = row.replaceAll("[\\(\\)\\;\\,]", "");
-			System.out.print("Trimmed row: \n" + row + "\n");
 			String[] splitted = row.split("\\s");
 			Pair[] pairs = new Pair[names.size()];
 			int i = 0 ;
@@ -147,14 +146,17 @@ public class BIFParser {
 	private void addNodes(String contents, BeliefNetwork bn) {
 		Matcher probMatcher = PROBABILITY_PATTERN.matcher(contents);
 		while (probMatcher.find()) {
+			
 			String entry = contents.substring(probMatcher.start(), probMatcher.end());
 			Matcher nameMatcher= NAME_PATTERN.matcher(entry);
 			if (nameMatcher.find()) {
 				String found = entry.substring(nameMatcher.start(), nameMatcher.end());
 				
 				// get rid of all non alphabet characters
-				String name = found.replaceAll("\\P{L}+", ""); 
+				String name = found.replaceAll("\\P{L}+", "");
 				BeliefNode bnode = new BeliefNode(name);
+				
+				System.out.print("Found node: " + name + "\n");
 				addParents(bnode, entry);
 
 				if (bnode.numberOfParents() == 0) {
@@ -164,7 +166,6 @@ public class BIFParser {
 					ArrayList<String> names = bnode.getParents();
 					addMultipleTableEntries(bnode, entry, names);
 				}
-				System.out.print(bnode + "\n\n");
 				bn.addNode(bnode);
 			}
 		}

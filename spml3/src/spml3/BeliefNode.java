@@ -17,7 +17,8 @@ public class BeliefNode implements DataStructuur {
 	/**
 	 * The data structure containing a probability table.
 	 */
-	private DataStructuur probabilities;
+	private ProbabilityMap probabilities;
+	private DataStructuur probStructure;
 
 	/**
 	 * Creates a BeliefNode with given name and a ProbabilityMap as data
@@ -29,18 +30,19 @@ public class BeliefNode implements DataStructuur {
 	 */
 	public BeliefNode(String name) {
 		this.name = name;
-		probabilities = new ProbabilityMap();
+		probabilities = new ProbabilityMap(name);
+		probStructure = probabilities;
 		parents = new ArrayList<String>();
 	}
 
 	@Override
 	public void addProbability(Pair[] query, double probability) {
-		probabilities.addProbability(query, probability);
+		probStructure.addProbability(query, probability);
 	}
 
 	@Override
 	public double getProbability(Pair[] query, Boolean state) {
-		return probabilities.getProbability(query, state);
+		return probStructure.getProbability(query, state);
 	}
 
 	/**
@@ -72,7 +74,7 @@ public class BeliefNode implements DataStructuur {
 
 	@Override
 	public String toString() {
-		return "Name: " + this.name + "\nParents: " + this.parents + "\nProbabilities" + this.probabilities;
+		return "Name: " + this.name + "\nParents: " + this.parents + "\nProbabilities" + this.probStructure;
 	}
 
 	/**
@@ -83,4 +85,20 @@ public class BeliefNode implements DataStructuur {
 	public ArrayList<String> getParents() {
 		return this.parents;
 	}
+
+	@Override
+	public void removeObserved(Pair pair) {
+		probStructure.removeObserved(pair);
+	}
+	
+	public ProbabilityMap cloneProbabilitiesTable() {
+		return probabilities.cloneMap();
+	}
+
+	@Override
+	public ArrayList<String> getVariableNames() {
+		return probStructure.getVariableNames();
+	}
+	
+	
 }

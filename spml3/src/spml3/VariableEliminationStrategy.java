@@ -5,48 +5,40 @@ import java.util.Collections;
 import java.util.List;
 
 public class VariableEliminationStrategy implements ProbabilityCalculationStrategy {
-	private ArrayList<BeliefNode> eliminationOrdering;
+	private ArrayList<String> eliminationOrdering;
 	private BeliefNetwork beliefnetwork;
 	private ArrayList<Factor> factors;
 
 	public VariableEliminationStrategy(BeliefNetwork beliefnetwork) {
-
-		// Dit moet niet in de constructor denk ik, maar pas na het
-		// identificeren vna de factoren.
-		// eliminationOrdering = generateEliminationOrdering(beliefnetwork);
-
 		this.beliefnetwork = beliefnetwork;
 		factors = new ArrayList<Factor>();
+		eliminationOrdering = new ArrayList<String>();
 	}
 
 	/**
-	 * Generated an elimination ordering.
-	 * 
-	 * @param beliefnetwork
-	 * @return
-	 * 
-	 * 		TODO: I propose we generate an ordering according to the number
-	 *         of parents a node has. We eliminate the nodes with a low number
-	 *         of parents first.
+	 * Generates a elimination ordering according to the total number of parents
+	 * each node has.
 	 */
-	private ArrayList<BeliefNode> generateEliminationOrdering(BeliefNetwork beliefnetwork) {
-		ArrayList<BeliefNode> eliminationordering = new ArrayList<BeliefNode>(beliefnetwork.getNodes().size() - 1);
-		String[] str = new String[8];
-		str[0] = "A"; // eliminate first
-		str[1] = "B";
-		str[2] = "C";
-		str[3] = "D"; // eliminate last
-		for (int a = 0; a < str.length; a++) {
-			for (BeliefNode beliefnode : beliefnetwork.getNodes()) {
-				if (beliefnode.getName() == str[a])
-					eliminationordering.add(beliefnode);
+	private void generateEliminationOrderingParents() {
+		ArrayList<String> noParent = new ArrayList<String>();
+		ArrayList<String> oneParent = new ArrayList<String>();
+		ArrayList<String> remainder = new ArrayList<String>();
+		for (BeliefNode node : beliefnetwork.getNodes()) {
+			if (beliefnetwork.getNumberOfParentsRecursive(node) == 0) {
+				noParent.add(node.getName());
+			} else if (beliefnetwork.getNumberOfParentsRecursive(node) == 1) {
+				oneParent.add(node.getName());
+			} else {
+				remainder.add(node.getName());
 			}
 		}
-		return eliminationordering;
+		oneParent.addAll(remainder);
+		noParent.addAll(oneParent);
+		eliminationOrdering = noParent;
 	}
-
+ 
 	/**
-	 * Generate a factor for every node in the network.
+	 * Generates a factor for every node in the network.
 	 * 
 	 * @param query
 	 */
@@ -57,34 +49,43 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 			// Create a factor for the query variable
 			Factor q = new Factor(n);
 			factors.add(q);
-			ArrayList<String> parents = new ArrayList<String>(n.numberOfParents());
-			parents.addAll(n.getParents());
-			for (int i = 0; i < parents.size(); i++) {
-				String s = parents.get(i);
-				BeliefNode parent = beliefnetwork.getNode(s);
-				factors.add(new Factor(parent));
-				parents.addAll(parent.getParents());
+			for (BeliefNode node : beliefnetwork.getNodes()) {
+				if (!node.getName().equals(query))
+				factors.add(new Factor(node));
 			}
 
 		} else { // If the query variable can't be found..
 			System.err.print("Could not find query node.");
 			System.exit(2);
 		}
-		return;
-
 	}
 
 	/**
-	 * Removes the observed factors from the list
+	 * 
+	 * @param parents
 	 */
-	public void reduceObserved(List<Boolean> parents) {
-
+	public void reduceObserved(Pair[] observed) {
+		for (Factor f : factors) {
+			for (Pair p : observed) {
+				f.reduceVariable(p);
+			}
+			
+		}
 	}
 
 	@Override
-	public double calculateProbability(String nodeName, Pair[] query) {
+	public double calculateProbability(String nodeName, Pair[] observedNodes) {
 		identifyFactors(nodeName);
-
+		System.out.println("Factors added: ");
+		for (Factor f : factors) {
+			System.out.println(f);
+		}
+		generateEliminationOrderingParents();
+		System.out.println("Elimination ordering: " + eliminationOrdering.toString().replaceAll("\\[\\]\\,\\s", ""));
+		reduceObserved(observedNodes);
+		for (Factor f : factors) {
+			System.out.println(f);
+		}
 		return 0.00;
 	}
 
@@ -95,8 +96,8 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 	 * @return
 	 */
 	public boolean isInEliminationOrdering(String nodeName) {
-		for (BeliefNode beliefnode : eliminationOrdering) {
-			if (beliefnode.getName().equals(nodeName))
+		for (String name : eliminationOrdering) {
+			if (name.equals(nodeName))
 				return true;
 		}
 		return false;

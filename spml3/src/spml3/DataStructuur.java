@@ -1,5 +1,7 @@
 package spml3;
 
+import java.util.ArrayList;
+
 public interface DataStructuur {
 
 	
@@ -22,4 +24,12 @@ public interface DataStructuur {
 	 * @return
 	 */
 	public double getProbability(Pair[] query, Boolean state);
+	
+	/**
+	 * Removes all entries in the map which do not contain specified pair
+	 * @param observed
+	 */
+	public void removeObserved(Pair pair);
+	
+	public ArrayList<String> getVariableNames();
 }

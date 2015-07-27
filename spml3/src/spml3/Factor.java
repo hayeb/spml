@@ -3,14 +3,18 @@
  */
 package spml3;
 
+import java.util.ArrayList;
+
 /**
  * @author mmwvh
  *
  */
 public class Factor {
-	private String[] variableNames;
+	private ArrayList<String> variableNames;
 
-	// Use this to store the probabilities for this factor.
+	/**
+	 *  Use this to store the probabilities for this factor.
+	 */
 	private final DataStructuur probabilities;
 
 	/**
@@ -23,25 +27,22 @@ public class Factor {
 	 * method
 	 */
 	public Factor(BeliefNode beliefnode) {
-		variableNames = new String[beliefnode.numberOfParents() + 1];
-		variableNames[0] = beliefnode.getName();
-		for (int i = 0; i < beliefnode.numberOfParents(); i++) {
-			variableNames[i + 1] = beliefnode.getParents().get(i);
-		}
-
-		probabilities = new ProbabilityMap();
+		probabilities = beliefnode.cloneProbabilitiesTable();
+		variableNames = new ArrayList<String>();
+		variableNames.addAll(probabilities.getVariableNames());
 	}
 
 	/**
-	 * Iterate over all the entries in the probability table, and remove all
-	 * variables for which the state is not equals to the parameters.
+	 * Reduce the specified observed variable from this factor. This will remove
+	 * all entries in the probability table which do not contain the observed
+	 * variable in its observed state.
+	 * 
+	 * @param variable
 	 */
-	public void eliminateVariable(String variableName, String state) {
-		String[] newVN;
-		for (int i = 0; i < variableNames.length; i++) {
-			if (variableNames[i] != variableName) {
-
-			}
+	public void reduceVariable(Pair observed) {
+		if (variableNames.contains(observed.getName())) {
+			variableNames.remove(observed.getName());
+			probabilities.removeObserved(observed);
 		}
 	}
 
@@ -52,5 +53,16 @@ public class Factor {
 	public void setObserved(boolean observed) {
 		this.observed = observed;
 	}
-
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		if (variableNames.size() > 0) {
+		sb.append(variableNames.get(0));
+		for (int i = 1; i < variableNames.size(); i++) {
+			sb.append(", " + variableNames.get(i));
+		}
+		}
+		return "f(" + sb.toString() + ")";
+	}
 }

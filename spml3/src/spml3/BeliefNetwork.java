@@ -45,6 +45,21 @@ public class BeliefNetwork implements ProbabilityCalculationStrategy {
 		return nodes;
 	}
 
+	/**
+	 * Recursively calculates the number of parents for a given node, for all
+	 * parents, parent of parents etc etc.
+	 * 
+	 * @param n
+	 * @return
+	 */
+	public int getNumberOfParentsRecursive(BeliefNode n) {
+		int parents = n.numberOfParents();
+		for (String s : n.getParents()) {
+			parents += getNumberOfParentsRecursive(getNode(s));
+		}
+		return parents;
+	}
+
 	@Override
 	public double calculateProbability(String nodeName, Pair[] query) {
 		return calcStrategy.calculateProbability(nodeName, query);

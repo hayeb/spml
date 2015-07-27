@@ -187,7 +187,6 @@ public class BIFParser {
 			Matcher nameMatcher= NAME_PATTERN.matcher(entry);
 			if (nameMatcher.find()) {
 				String found = entry.substring(nameMatcher.start(), nameMatcher.end());
-				System.out.print("Found: " + found + "\n");
 				
 				// get rid of all non alphabet characters
 				String name = found.replaceAll("[\\(\\)\\|]", "").trim();

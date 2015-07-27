@@ -67,12 +67,17 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 	 * @param parents
 	 */
 	public void reduceObserved(Pair[] observed) {
+		ArrayList<Factor> remove = new ArrayList<Factor>();
 		for (Factor f : factors) {
 			for (Pair p : observed) {
 				f.reduceVariable(p);
 			}
+			if (f.isObserved()) {
+				remove.add(f);
+			}
 
 		}
+		factors.removeAll(remove);
 	}
 
 	@Override

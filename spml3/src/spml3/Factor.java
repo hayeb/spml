@@ -11,6 +11,7 @@ import java.util.ArrayList;
  */
 public class Factor {
 	private ArrayList<String> variableNames;
+	private ArrayList<Pair> observedVariables;
 
 	/**
 	 * Use this to store the probabilities for this factor.
@@ -30,6 +31,7 @@ public class Factor {
 		probabilities = beliefnode.cloneProbabilitiesTable();
 		variableNames = new ArrayList<String>();
 		variableNames.addAll(probabilities.getVariableNames());
+		observedVariables = new ArrayList<Pair>();
 	}
 
 	/**
@@ -41,8 +43,17 @@ public class Factor {
 	 */
 	public void reduceVariable(Pair observed) {
 		if (variableNames.contains(observed.getName())) {
-			variableNames.remove(observed.getName());
 			probabilities.removeObserved(observed);
+			adjustNameList(observed.getName());
+			observedVariables.add(observed);
+		}
+	}
+
+	private void adjustNameList(String name) {
+		variableNames = probabilities.getVariableNames();
+		if (variableNames.size() == 1) {
+			System.out.println(variableNames.get(0) + " is observed.");
+			observed = true;
 		}
 	}
 
@@ -57,10 +68,24 @@ public class Factor {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		if (variableNames.size() > 0) {
-			sb.append(variableNames.get(0));
-			for (int i = 1; i < variableNames.size(); i++) {
-				sb.append(", " + variableNames.get(i));
+		if (variableNames.size() > 1) {
+			for (int i = 0; i < variableNames.size(); i++) {
+				boolean observedVariable = false;
+				String state = "";
+				for (Pair p : observedVariables) {
+					if (p.getName().equals(variableNames.get(i))) {
+						observedVariable = true;
+						state = p.getState();
+					}
+				}
+				if (observedVariable) {
+					sb.append(variableNames.get(i) + "=" + state);
+				} else {
+					sb.append(variableNames.get(i));
+				}
+				if (!(i == variableNames.size()-1)) {
+					sb.append(", ");
+				}
 			}
 		}
 		return "f(" + sb.toString() + ")";

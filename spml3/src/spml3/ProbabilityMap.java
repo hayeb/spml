@@ -38,17 +38,13 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 	@Override
 	public double getProbability(Pair[] query, Boolean state) {
 		Arrays.sort(query);
-		if (state) {
-			return this.get(query);
-		} else {
-			return 1 - this.get(query);
-		}
+		return this.get(query);
 	}
 
 	@Override
 	public void removeObserved(Pair pair) {
-		Pair[][] test = new Pair[this.keySet().size()][];
-		Pair[][] rows = this.keySet().toArray(test);
+		// Initialise an array which holds the keys of the map
+		Pair[][] rows = this.keySet().toArray(new Pair[this.keySet().size()][]);
 		for (Pair[] p : rows) {
 			boolean keep = true;
 			for (int i = 0; i < p.length && keep; i++) {
@@ -74,7 +70,6 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 	public ArrayList<String> getVariableNames() {
 		Pair[] p = this.keySet().iterator().next();
 		ArrayList<String> names = new ArrayList<String>();
-		names.add(variableName);
 		for (Pair pair : p) {
 			names.add(pair.getName());
 		}

@@ -36,7 +36,7 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 		noParent.addAll(oneParent);
 		eliminationOrdering = noParent;
 	}
- 
+
 	/**
 	 * Generates a factor for every node in the network.
 	 * 
@@ -50,8 +50,10 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 			Factor q = new Factor(n);
 			factors.add(q);
 			for (BeliefNode node : beliefnetwork.getNodes()) {
-				if (!node.getName().equals(query))
-				factors.add(new Factor(node));
+				System.out.println("Creating factor: " + node.getName());
+				if (!node.getName().equals(query)) {
+					factors.add(new Factor(node));
+				}
 			}
 
 		} else { // If the query variable can't be found..
@@ -69,7 +71,7 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 			for (Pair p : observed) {
 				f.reduceVariable(p);
 			}
-			
+
 		}
 	}
 

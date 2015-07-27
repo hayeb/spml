@@ -106,12 +106,14 @@ public class BIFParser {
 	 * @param bnode
 	 * @param entry
 	 */
-	private void addSingleTableEntry(BeliefNode bnode, String entry) {
-		Matcher tableMatcher = TABLE_PATTERN.matcher(entry);
-		if (tableMatcher.find()) {
-			bnode.addProbability(new Pair[0],
-					Double.parseDouble(entry.substring(tableMatcher.start() + 7, tableMatcher.end() - 1)));
+	private void addSingleTableEntry(BeliefNode bnode, String entry, ArrayList<String> states) {
+		String[] probabilities = entry.split("\n")[1].replaceAll("[table\\;]", "").trim().split(",\\s");
+		int i = 0;
+		for (String s : probabilities) {
+			bnode.addProbability(new Pair[] {new Pair(bnode.getName(), states.get(i))}, Double.parseDouble(s));
+			i++;
 		}
+		
 	}
 	
 	/**
@@ -120,20 +122,54 @@ public class BIFParser {
 	 * @param entry
 	 * @param names
 	 */
-	private void addMultipleTableEntries(BeliefNode bnode, String entry, ArrayList<String> names) {
+	private void addMultipleTableEntries(BeliefNode bnode, String entry, ArrayList<String> names, ArrayList<String> states) {
 		Matcher tableMatcher = ROW_PATTERN.matcher(entry);
 		while (tableMatcher.find()) {
 			String row = entry.substring(tableMatcher.start(), tableMatcher.end());
 			row = row.replaceAll("[\\(\\)\\;\\,]", "");
 			String[] splitted = row.split("\\s");
+			// Add one for the variable itsself
 			Pair[] pairs = new Pair[names.size()];
-			int i = 0 ;
-			for (; i < names.size(); i++) {
-				pairs[i] = new Pair(names.get(i), splitted[i]);
+			int var_number = 0;
+			
+			// Skip this: black magic combined with ancient voodoo.
+			for (int i = 0; i < splitted.length; i++) {
+				if (i < names.size()) {
+					pairs[i] = new Pair(names.get(i), splitted[i]);
+				} else {
+					Double d = Double.parseDouble(splitted[i]);
+					Pair[] temp = new Pair[pairs.length + 1];
+					for (int h = 0; h < temp.length-1; h++) {
+						temp[h] = pairs[h];
+					}
+					temp[temp.length-1] = new Pair(bnode.getName(), states.get(var_number));
+					bnode.addProbability(temp, d);
+					var_number += 1;
+				}
 			}
-			bnode.addProbability(pairs, Double.parseDouble(splitted[i]));
 			
 		}
+	}
+	
+	private ArrayList<String> findStates(String nodeName, String contents) {
+		ArrayList<String> states = new ArrayList<String>();
+		nodeName = nodeName.trim();
+		
+		Pattern p = Pattern.compile("^variable\\s{1}" + nodeName + ".*?^\\}", Pattern.DOTALL | Pattern.MULTILINE);
+		Matcher m = p.matcher(contents);
+		if (m.find()) {
+			String match = contents.substring(m.start(), m.end());
+			Pattern p1 = Pattern.compile("\\{.{1,}?\\,(\\s.{1,}?)*\\}");
+			Matcher m1 = p1.matcher(match);
+			if (m1.find()){
+				String stateMatch = match.substring(m1.start(), m1.end());
+				stateMatch = stateMatch.replaceAll("[\\{\\}\\,]", "");
+				for (String s : stateMatch.split("\\s")) {
+					states.add(s);
+				}
+			}
+		}
+		return states;
 	}
 
 	/**
@@ -151,20 +187,21 @@ public class BIFParser {
 			Matcher nameMatcher= NAME_PATTERN.matcher(entry);
 			if (nameMatcher.find()) {
 				String found = entry.substring(nameMatcher.start(), nameMatcher.end());
+				System.out.print("Found: " + found + "\n");
 				
 				// get rid of all non alphabet characters
-				String name = found.replaceAll("\\P{L}+", "");
+				String name = found.replaceAll("[\\(\\)\\|]", "").trim();
 				BeliefNode bnode = new BeliefNode(name);
 				
 				System.out.print("Found node: " + name + "\n");
 				addParents(bnode, entry);
-
+				ArrayList<String> states = findStates(name, contents);
 				if (bnode.numberOfParents() == 0) {
-					addSingleTableEntry(bnode, entry);
+					addSingleTableEntry(bnode, entry, states);
 				} else {
 					// Extract all variable names.
 					ArrayList<String> names = bnode.getParents();
-					addMultipleTableEntries(bnode, entry, names);
+					addMultipleTableEntries(bnode, entry, names, states);
 				}
 				bn.addNode(bnode);
 			}

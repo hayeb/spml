@@ -13,7 +13,7 @@ public class Factor {
 	private ArrayList<String> variableNames;
 
 	/**
-	 *  Use this to store the probabilities for this factor.
+	 * Use this to store the probabilities for this factor.
 	 */
 	private final DataStructuur probabilities;
 
@@ -53,15 +53,15 @@ public class Factor {
 	public void setObserved(boolean observed) {
 		this.observed = observed;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		if (variableNames.size() > 0) {
-		sb.append(variableNames.get(0));
-		for (int i = 1; i < variableNames.size(); i++) {
-			sb.append(", " + variableNames.get(i));
-		}
+			sb.append(variableNames.get(0));
+			for (int i = 1; i < variableNames.size(); i++) {
+				sb.append(", " + variableNames.get(i));
+			}
 		}
 		return "f(" + sb.toString() + ")";
 	}

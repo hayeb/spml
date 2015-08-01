@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class VariableEliminationStrategy implements ProbabilityCalculationStrategy {
+public class VariableEliminationStrategy implements
+		ProbabilityCalculationStrategy {
 	private ArrayList<String> eliminationOrdering;
 	private BeliefNetwork beliefnetwork;
 	private ArrayList<Factor> factors;
@@ -16,8 +17,8 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 	}
 
 	/**
-	 * Generates a elimination ordering according to the total number of parents
-	 * each node has.
+	 * Generates a elimination ordering according to the total number of
+	 * parents each node has.
 	 */
 	private void generateEliminationOrderingParents() {
 		ArrayList<String> noParent = new ArrayList<String>();
@@ -26,7 +27,8 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 		for (BeliefNode node : beliefnetwork.getNodes()) {
 			if (beliefnetwork.getNumberOfParentsRecursive(node) == 0) {
 				noParent.add(node.getName());
-			} else if (beliefnetwork.getNumberOfParentsRecursive(node) == 1) {
+			} else if (beliefnetwork
+					.getNumberOfParentsRecursive(node) == 1) {
 				oneParent.add(node.getName());
 			} else {
 				remainder.add(node.getName());
@@ -50,7 +52,8 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 			Factor q = new Factor(n);
 			factors.add(q);
 			for (BeliefNode node : beliefnetwork.getNodes()) {
-				System.out.println("Creating factor: " + node.getName());
+				System.out.println("Creating factor: "
+						+ node.getName());
 				if (!node.getName().equals(query)) {
 					factors.add(new Factor(node));
 				}
@@ -63,19 +66,26 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 	}
 
 	/**
+	 * Removes all observed factors from the factor list
 	 * 
 	 * @param parents
+	 * 
+	 *                TODO; move the observed calculation from the factor
+	 *                itsself
 	 */
 	public void reduceObserved(Pair[] observed) {
 		ArrayList<Factor> remove = new ArrayList<Factor>();
 		for (Factor f : factors) {
 			for (Pair p : observed) {
-				f.reduceVariable(p);
-			}
-			if (f.isObserved()) {
-				remove.add(f);
-			}
+				if (f.isSingletonObserved(p.getName())) {
+					remove.add(f);
+				} else {
+					if (f.hasVariable(p.getName())) {
+						f.reduceVariable(p);
+					}
+				}
 
+			}
 		}
 		factors.removeAll(remove);
 	}
@@ -83,16 +93,31 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 	@Override
 	public double calculateProbability(String nodeName, Pair[] observedNodes) {
 		identifyFactors(nodeName);
-		System.out.println("Factors added: ");
-		for (Factor f : factors) {
-			System.out.println(f);
-		}
 		generateEliminationOrderingParents();
-		System.out.println("Elimination ordering: " + eliminationOrdering.toString().replaceAll("\\[\\]\\,\\s", ""));
+		System.out.println("\nElimination ordering:\n "
+				+ eliminationOrdering.toString().replaceAll(
+						"\\[\\]\\,\\s", "") + "\n");
+		
+		System.out.print("Reducing observed variables\n");
 		reduceObserved(observedNodes);
 		for (Factor f : factors) {
 			System.out.println(f);
 		}
+		// For each factor in the elimination ordering..
+		for (String var : eliminationOrdering) {
+			System.out.println("\nEliminating variable " + var
+					+ "\n");
+			ArrayList<Factor> toMultiply = new ArrayList<Factor>();
+			for (int i = 0; i < factors.size(); i++) {
+				Factor f = factors.get(i);
+				if (f.hasVariable(var)) {
+					toMultiply.add(f);
+				}
+			}
+			System.out.println("Factors to eliminate: "
+					+ toMultiply);
+		}
+
 		return 0.00;
 	}
 

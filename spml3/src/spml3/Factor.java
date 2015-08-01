@@ -42,19 +42,17 @@ public class Factor {
 	 * @param variable
 	 */
 	public void reduceVariable(Pair observed) {
-		if (variableNames.contains(observed.getName())) {
 			probabilities.removeObserved(observed);
 			adjustNameList(observed.getName());
 			observedVariables.add(observed);
-		}
 	}
 
+	/**
+	 * Updates the variable name list according to variables on the probability map.
+	 * @param name
+	 */
 	private void adjustNameList(String name) {
 		variableNames = probabilities.getVariableNames();
-		if (variableNames.size() == 1) {
-			System.out.println(variableNames.get(0) + " is observed.");
-			observed = true;
-		}
 	}
 
 	public boolean isObserved() {
@@ -64,11 +62,23 @@ public class Factor {
 	public void setObserved(boolean observed) {
 		this.observed = observed;
 	}
+	
+	public boolean hasVariable(String variableName) {
+		return variableNames.contains(variableName);
+	}
+	
+	/**
+	 * Returns if this factor only contains 1 variable and if this variable is observed according to the string name.
+	 * @return
+	 */
+	public boolean isSingletonObserved(String name) {
+		return variableNames.contains(name) && variableNames.size() == 1;	
+	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		if (variableNames.size() > 1) {
+		if (variableNames.size() > 0) {
 			for (int i = 0; i < variableNames.size(); i++) {
 				boolean observedVariable = false;
 				String state = "";

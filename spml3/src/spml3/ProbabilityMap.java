@@ -12,7 +12,8 @@ import java.util.HashMap;
  * @author haye
  *
  */
-public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStructuur, Cloneable {
+public class ProbabilityMap extends HashMap<Pair[], Double> implements
+		DataStructuur, Cloneable {
 
 	/**
 	 * 
@@ -23,7 +24,7 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 	 * The name of the variable where this map belongs to.
 	 */
 	private String variableName;
-	
+
 	public ProbabilityMap(String name) {
 		this.variableName = name;
 	}
@@ -44,11 +45,17 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 	@Override
 	public void removeObserved(Pair pair) {
 		// Initialise an array which holds the keys of the map
-		Pair[][] rows = this.keySet().toArray(new Pair[this.keySet().size()][]);
+		Pair[][] rows = this.keySet().toArray(
+				new Pair[this.keySet().size()][]);
+
+		// For every pair, remove the entry if it has the same name but
+		// not the same state.
 		for (Pair[] p : rows) {
 			boolean keep = true;
 			for (int i = 0; i < p.length && keep; i++) {
-				if (p[i].getName() == pair.getName() && p[i].getState() != pair.getState()) {
+				if (p[i].getName() == pair.getName()
+						&& p[i].getState() != pair
+								.getState()) {
 					keep = false;
 				}
 			}
@@ -56,6 +63,7 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 				this.remove(p);
 			}
 		}
+		cleanUpVariables(pair.getName());
 	}
 
 	public ProbabilityMap cloneMap() {
@@ -64,6 +72,14 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 			map.addProbability(p, this.get(p));
 		}
 		return map;
+	}
+
+	private void cleanUpVariables(String name) {
+		Pair[][] rows = this.keySet().toArray(
+				new Pair[this.keySet().size()][]);
+		ArrayList<Pair> unique = new ArrayList<Pair>();
+
+		// TODO: Implement cleanup
 	}
 
 	@Override

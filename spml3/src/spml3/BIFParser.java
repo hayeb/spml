@@ -98,6 +98,8 @@ public class BIFParser {
 			for (String st : parent) {
 				node.addParent(st);
 			}
+		} else {
+			System.err.print("Could not find parents for node " + node.getName() + "\n");
 		}
 	}
 	
@@ -167,7 +169,11 @@ public class BIFParser {
 				for (String s : stateMatch.split("\\s")) {
 					states.add(s);
 				}
+			} else {
+				System.err.print("Could not find a matching states for node " + nodeName + "\n");
 			}
+		} else {
+			System.err.print("Could not find a matching variable entry for node " + nodeName + "\n");
 		}
 		return states;
 	}

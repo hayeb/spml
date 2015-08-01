@@ -23,13 +23,18 @@ public interface DataStructuur {
 	 * @param state
 	 * @return
 	 */
-	public double getProbability(Pair[] query, Boolean state);
+	public double getProbability(Pair[] query);
 	
 	/**
 	 * Removes all entries in the map which do not contain specified pair
 	 * @param observed
 	 */
 	public void removeObserved(Pair pair);
+	
+	/**
+	 * Removes a row from the table
+	 */
+	public void removeRow(Pair[] row);
 	
 	public ArrayList<String> getVariableNames();
 }

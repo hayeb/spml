@@ -35,23 +35,25 @@ public class Factor {
 	}
 
 	/**
-	 * Reduce the specified observed variable from this factor. This will remove
-	 * all entries in the probability table which do not contain the observed
-	 * variable in its observed state.
+	 * Reduce the specified observed variable from this factor. This will
+	 * remove all entries in the probability table which do not contain the
+	 * observed variable in its observed state.
 	 * 
 	 * @param variable
 	 */
 	public void reduceVariable(Pair observed) {
-			probabilities.removeObserved(observed);
-			adjustNameList(observed.getName());
-			observedVariables.add(observed);
+		probabilities.removeObserved(observed);
+		adjustNameList(observed.getName());
+		observedVariables.add(observed);
 	}
 
 	/**
-	 * Updates the variable name list according to variables on the probability map.
+	 * Updates the variable name list according to variables on the
+	 * probability map.
+	 * 
 	 * @param name
 	 */
-	private void adjustNameList(String name) {
+	public void adjustNameList(String name) {
 		variableNames = probabilities.getVariableNames();
 	}
 
@@ -62,17 +64,20 @@ public class Factor {
 	public void setObserved(boolean observed) {
 		this.observed = observed;
 	}
-	
+
 	public boolean hasVariable(String variableName) {
 		return variableNames.contains(variableName);
 	}
-	
+
 	/**
-	 * Returns if this factor only contains 1 variable and if this variable is observed according to the string name.
+	 * Returns if this factor only contains 1 variable and if this variable
+	 * is observed according to the string name.
+	 * 
 	 * @return
 	 */
 	public boolean isSingletonObserved(String name) {
-		return variableNames.contains(name) && variableNames.size() == 1;	
+		return variableNames.contains(name)
+				&& variableNames.size() == 1;
 	}
 
 	@Override
@@ -82,18 +87,9 @@ public class Factor {
 			for (int i = 0; i < variableNames.size(); i++) {
 				boolean observedVariable = false;
 				String state = "";
-				for (Pair p : observedVariables) {
-					if (p.getName().equals(variableNames.get(i))) {
-						observedVariable = true;
-						state = p.getState();
-					}
-				}
-				if (observedVariable) {
-					sb.append(variableNames.get(i) + "=" + state);
-				} else {
-					sb.append(variableNames.get(i));
-				}
-				if (!(i == variableNames.size()-1)) {
+				sb.append(variableNames.get(i));
+
+				if (!(i == variableNames.size() - 1)) {
 					sb.append(", ");
 				}
 			}

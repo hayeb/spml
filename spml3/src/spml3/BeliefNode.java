@@ -41,8 +41,8 @@ public class BeliefNode implements DataStructuur {
 	}
 
 	@Override
-	public double getProbability(Pair[] query, Boolean state) {
-		return probStructure.getProbability(query, state);
+	public double getProbability(Pair[] query) {
+		return probStructure.getProbability(query);
 	}
 
 	/**
@@ -98,6 +98,12 @@ public class BeliefNode implements DataStructuur {
 	@Override
 	public ArrayList<String> getVariableNames() {
 		return probStructure.getVariableNames();
+	}
+
+	@Override
+	public void removeRow(Pair[] row) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

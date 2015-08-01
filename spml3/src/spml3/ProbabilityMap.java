@@ -37,13 +37,14 @@ public class ProbabilityMap extends HashMap<Pair[], Double> implements
 	}
 
 	@Override
-	public double getProbability(Pair[] query, Boolean state) {
+	public double getProbability(Pair[] query) {
 		Arrays.sort(query);
 		return this.get(query);
 	}
 
 	@Override
 	public void removeObserved(Pair pair) {
+		//System.out.println("Running removeObserved in " + variableName + "\nEliminating " + pair.getName() + "\n");
 		// Initialise an array which holds the keys of the map
 		Pair[][] rows = this.keySet().toArray(
 				new Pair[this.keySet().size()][]);
@@ -53,14 +54,17 @@ public class ProbabilityMap extends HashMap<Pair[], Double> implements
 		for (Pair[] p : rows) {
 			boolean keep = true;
 			for (int i = 0; i < p.length && keep; i++) {
-				if (p[i].getName() == pair.getName()
-						&& p[i].getState() != pair
-								.getState()) {
-					keep = false;
+				if (p[i].getName().equals( pair.getName())) {
+					//System.out.print("Found matching pair: " + pair.getName() + "\n");
+					if (!p[i].getState().equals(pair.getState())) {
+						keep = false;
+					}
 				}
 			}
 			if (!keep) {
-				this.remove(p);
+				//System.out.println("Removing: " + p);
+				this.removeRow(p);
+
 			}
 		}
 		cleanUpVariables(pair.getName());
@@ -75,11 +79,35 @@ public class ProbabilityMap extends HashMap<Pair[], Double> implements
 	}
 
 	private void cleanUpVariables(String name) {
-		Pair[][] rows = this.keySet().toArray(
-				new Pair[this.keySet().size()][]);
-		ArrayList<Pair> unique = new ArrayList<Pair>();
+		Pair[][] rows = Arrays.copyOf(
+				this.keySet()
+						.toArray(new Pair[this.keySet()
+								.size()][]),
+				keySet().size());
 
 		// TODO: Implement cleanup
+		/*
+		 * Steps; 1. For every key-value pair: 2. Copy the key and value
+		 * 3. Remove the observed variable from the key 4. Remove the
+		 * original key-value pair from the structure 5. add the
+		 * copied/adjusted key-value pair
+		 */
+
+		for (int i = 0; i < rows.length; i++) {
+			Pair[] value = rows[i];
+			double key = this.getProbability(value);
+			ArrayList<Pair> newKeyList = new ArrayList<Pair>();
+
+			for (int j = 0; j < value.length; j++) {
+				Pair p = value[j];
+				if (!value[j].getName().equals(name)) {
+					newKeyList.add(p);
+				}
+			}
+			this.removeRow(value);
+			Pair[] newKey = new Pair[newKeyList.size()];
+			this.addProbability(newKeyList.toArray(newKey), key);
+		}
 	}
 
 	@Override
@@ -90,5 +118,11 @@ public class ProbabilityMap extends HashMap<Pair[], Double> implements
 			names.add(pair.getName());
 		}
 		return names;
+	}
+
+	@Override
+	public void removeRow(Pair[] row) {
+		Arrays.sort(row);
+		this.remove(row);
 	}
 }

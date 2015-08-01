@@ -97,16 +97,15 @@ public class VariableEliminationStrategy implements
 		System.out.println("\nElimination ordering:\n "
 				+ eliminationOrdering.toString().replaceAll(
 						"\\[\\]\\,\\s", "") + "\n");
-		
+
 		System.out.print("Reducing observed variables\n");
 		reduceObserved(observedNodes);
 		for (Factor f : factors) {
-			System.out.println(f);
+			f.adjustNameList(null);
 		}
 		// For each factor in the elimination ordering..
 		for (String var : eliminationOrdering) {
-			System.out.println("\nEliminating variable " + var
-					+ "\n");
+			System.out.println("\nEliminating variable " + var);
 			ArrayList<Factor> toMultiply = new ArrayList<Factor>();
 			for (int i = 0; i < factors.size(); i++) {
 				Factor f = factors.get(i);
@@ -114,11 +113,24 @@ public class VariableEliminationStrategy implements
 					toMultiply.add(f);
 				}
 			}
+			factors.removeAll(toMultiply);
 			System.out.println("Factors to eliminate: "
 					+ toMultiply);
+			if ((toMultiply.size() == 1 && !(factors.size() == 1))) {
+				System.out.print("variable "
+						+ toMultiply.get(0)
+						+ " has no influence on the outcome. We will leave this alone.\n");
+			} else {
+				multiplyFactors(toMultiply);
+			}
+
 		}
 
 		return 0.00;
+	}
+
+	private void multiplyFactors(ArrayList<Factor> factors) {
+
 	}
 
 	/**

@@ -65,6 +65,13 @@ public class Factor {
 		this.observed = observed;
 	}
 
+	/**
+	 * Returns if this factor has a variable with given name. Does not
+	 * account for case sensitivity or trailing whitespace etc.
+	 * 
+	 * @param variableName
+	 * @return
+	 */
 	public boolean hasVariable(String variableName) {
 		return variableNames.contains(variableName);
 	}

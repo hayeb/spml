@@ -6,10 +6,16 @@ import java.util.List;
 
 public class VariableEliminationStrategy implements
 		ProbabilityCalculationStrategy {
-	private ArrayList<String> eliminationOrdering;
+	private List<String> eliminationOrdering;
 	private BeliefNetwork beliefnetwork;
-	private ArrayList<Factor> factors;
+	private List<Factor> factors;
 
+	/**
+	 * Initializes this strategy with given belief network and arraylists
+	 * for factors and elimination Ordering
+	 * 
+	 * @param beliefnetwork
+	 */
 	public VariableEliminationStrategy(BeliefNetwork beliefnetwork) {
 		this.beliefnetwork = beliefnetwork;
 		factors = new ArrayList<Factor>();
@@ -18,7 +24,8 @@ public class VariableEliminationStrategy implements
 
 	/**
 	 * Generates a elimination ordering according to the total number of
-	 * parents each node has.
+	 * parents each node has. Places the ordering in the elimination
+	 * ordering list.
 	 */
 	private void generateEliminationOrderingParents() {
 		ArrayList<String> noParent = new ArrayList<String>();
@@ -40,7 +47,7 @@ public class VariableEliminationStrategy implements
 	}
 
 	/**
-	 * Generates a factor for every node in the network.
+	 * Generates a factor for every node in the network. Exits if the query node could not be found.
 	 * 
 	 * @param query
 	 */
@@ -129,6 +136,10 @@ public class VariableEliminationStrategy implements
 		return 0.00;
 	}
 
+	/**
+	 * Multiplies all factors in the list and replaces them with 1 factor
+	 * @param factors
+	 */
 	private void multiplyFactors(ArrayList<Factor> factors) {
 
 	}

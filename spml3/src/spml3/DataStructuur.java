@@ -36,5 +36,9 @@ public interface DataStructuur {
 	 */
 	public void removeRow(Pair[] row);
 	
+	/**
+	 * Returns the variablenames in this data structure
+	 * @return
+	 */
 	public ArrayList<String> getVariableNames();
 }

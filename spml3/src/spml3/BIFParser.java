@@ -16,12 +16,12 @@ import java.util.regex.Pattern;
 public class BIFParser {
 
 	/**
-	 * Regular expression for finding a single probability table entry within a probability
-	 * entry.
+	 * Regular expression for finding a single probability table entry
+	 * within a probability entry.
 	 */
 	private final String TABLE_REGEX = "\\stable\\s\\d\\.\\d{1,}\\,";
 	private Pattern TABLE_PATTERN;
-	
+
 	private final String ROW_REGEX = "\\([TF][^\\n]*\\;";
 	private Pattern ROW_PATTERN;
 
@@ -43,17 +43,18 @@ public class BIFParser {
 	public BIFParser() {
 		TABLE_PATTERN = Pattern.compile(TABLE_REGEX);
 		NAME_PATTERN = Pattern.compile(NAME_REGEX, Pattern.DOTALL);
-		PROBABILITY_PATTERN = Pattern.compile(PROBABILITY_REGEX, Pattern.DOTALL | Pattern.MULTILINE);
+		PROBABILITY_PATTERN = Pattern.compile(PROBABILITY_REGEX,
+				Pattern.DOTALL | Pattern.MULTILINE);
 		ROW_PATTERN = Pattern.compile(ROW_REGEX, Pattern.DOTALL);
 	}
 
 	/**
-	 * Takes a .bif file, and returns a BeliefNetwork with the same structure.
-	 * Expects the .bif file to be from AISpace. ONly accepts files which have
-	 * only boolean variables.
+	 * Takes a .bif file, and returns a BeliefNetwork with the same
+	 * structure. Expects the .bif file to be from AISpace. ONly accepts
+	 * files which have only boolean variables.
 	 * 
 	 * @param f
-	 * 			File from which to parse the .bif file.
+	 *                File from which to parse the .bif file.
 	 * @return
 	 * @throws IOException
 	 */
@@ -82,105 +83,139 @@ public class BIFParser {
 	}
 
 	/**
-	 * Adds parent to the parameter node from the probability entry. 
+	 * Adds parent to the parameter node from the probability entry.
+	 * 
 	 * @param node
-	 * 			Node to add the parents to
+	 *                Node to add the parents to
 	 * @param probabilityEntry
-	 * 			String from which to read the parents from.
+	 *                String from which to read the parents from.
 	 */
 	private void addParents(BeliefNode node, String probabilityEntry) {
 		final String pattern = "\\|\\s.*\\)\\s\\{";
-		Pattern p = Pattern.compile(pattern, Pattern.DOTALL | Pattern.MULTILINE);
+		Pattern p = Pattern.compile(pattern, Pattern.DOTALL
+				| Pattern.MULTILINE);
 		Matcher m = p.matcher(probabilityEntry);
 		if (m.find()) {
-			String found = probabilityEntry.substring(m.start() + 2, m.end() - 3);
+			String found = probabilityEntry.substring(
+					m.start() + 2, m.end() - 3);
 			String[] parent = found.split(", ");
 			for (String st : parent) {
 				node.addParent(st);
 			}
 		} else {
-			System.err.print("Could not find parents for node " + node.getName() + "\n");
+			System.err.print("Could not find parents for node "
+					+ node.getName() + "\n");
 		}
 	}
-	
+
 	/**
 	 * Adds the probability from a single-row table to the parameter node.
+	 * 
 	 * @param bnode
 	 * @param entry
 	 */
-	private void addSingleTableEntry(BeliefNode bnode, String entry, ArrayList<String> states) {
-		String[] probabilities = entry.split("\n")[1].replaceAll("[table\\;]", "").trim().split(",\\s");
+	private void addSingleTableEntry(BeliefNode bnode, String entry,
+			ArrayList<String> states) {
+		String[] probabilities = entry.split("\n")[1]
+				.replaceAll("[table\\;]", "").trim()
+				.split(",\\s");
 		int i = 0;
 		for (String s : probabilities) {
-			bnode.addProbability(new Pair[] {new Pair(bnode.getName(), states.get(i))}, Double.parseDouble(s));
+			bnode.addProbability(
+					new Pair[] { new Pair(bnode.getName(),
+							states.get(i)) },
+					Double.parseDouble(s));
 			i++;
 		}
-		
+
 	}
-	
+
 	/**
 	 * Adds the probabilities from a multi-row table to the parameter node.
+	 * 
 	 * @param bnode
 	 * @param entry
 	 * @param names
 	 */
-	private void addMultipleTableEntries(BeliefNode bnode, String entry, ArrayList<String> names, ArrayList<String> states) {
+	private void addMultipleTableEntries(BeliefNode bnode, String entry,
+			ArrayList<String> names, ArrayList<String> states) {
 		Matcher tableMatcher = ROW_PATTERN.matcher(entry);
 		while (tableMatcher.find()) {
-			String row = entry.substring(tableMatcher.start(), tableMatcher.end());
+			String row = entry.substring(tableMatcher.start(),
+					tableMatcher.end());
 			row = row.replaceAll("[\\(\\)\\;\\,]", "");
 			String[] splitted = row.split("\\s");
 			// Add one for the variable itsself
 			Pair[] pairs = new Pair[names.size()];
 			int var_number = 0;
-			
+
 			// Skip this: black magic combined with ancient voodoo.
 			for (int i = 0; i < splitted.length; i++) {
 				if (i < names.size()) {
-					pairs[i] = new Pair(names.get(i), splitted[i]);
+					pairs[i] = new Pair(names.get(i),
+							splitted[i]);
 				} else {
-					Double d = Double.parseDouble(splitted[i]);
+					Double d = Double
+							.parseDouble(splitted[i]);
 					Pair[] temp = new Pair[pairs.length + 1];
-					for (int h = 0; h < temp.length-1; h++) {
+					for (int h = 0; h < temp.length - 1; h++) {
 						temp[h] = pairs[h];
 					}
-					temp[temp.length-1] = new Pair(bnode.getName(), states.get(var_number));
+					temp[temp.length - 1] = new Pair(
+							bnode.getName(),
+							states.get(var_number));
 					bnode.addProbability(temp, d);
 					var_number += 1;
 				}
 			}
-			
+
 		}
 	}
-	
+
+	/**
+	 * Given a variable name, finds all possible states for that variable in
+	 * the contents string.
+	 * 
+	 * @param nodeName
+	 * @param contents
+	 * @return A list of string with all states
+	 */
 	private ArrayList<String> findStates(String nodeName, String contents) {
 		ArrayList<String> states = new ArrayList<String>();
 		nodeName = nodeName.trim();
-		
-		Pattern p = Pattern.compile("^variable\\s{1}" + nodeName + ".*?^\\}", Pattern.DOTALL | Pattern.MULTILINE);
+
+		Pattern p = Pattern
+				.compile("^variable\\s{1}" + nodeName
+						+ ".*?^\\}", Pattern.DOTALL
+						| Pattern.MULTILINE);
 		Matcher m = p.matcher(contents);
 		if (m.find()) {
 			String match = contents.substring(m.start(), m.end());
-			Pattern p1 = Pattern.compile("\\{.{1,}?\\,(\\s.{1,}?)*\\}");
+			Pattern p1 = Pattern
+					.compile("\\{.{1,}?\\,(\\s.{1,}?)*\\}");
 			Matcher m1 = p1.matcher(match);
-			if (m1.find()){
-				String stateMatch = match.substring(m1.start(), m1.end());
-				stateMatch = stateMatch.replaceAll("[\\{\\}\\,]", "");
+			if (m1.find()) {
+				String stateMatch = match.substring(m1.start(),
+						m1.end());
+				stateMatch = stateMatch.replaceAll(
+						"[\\{\\}\\,]", "");
 				for (String s : stateMatch.split("\\s")) {
 					states.add(s);
 				}
 			} else {
-				System.err.print("Could not find a matching states for node " + nodeName + "\n");
+				System.err.print("Could not find a matching states for node "
+						+ nodeName + "\n");
 			}
 		} else {
-			System.err.print("Could not find a matching variable entry for node " + nodeName + "\n");
+			System.err.print("Could not find a matching variable entry for node "
+					+ nodeName + "\n");
 		}
 		return states;
 	}
 
 	/**
-	 * Finds all probability entries in the .bif file and creates a node for the
-	 * entry.
+	 * Finds all probability entries in the .bif file and creates a node for
+	 * the entry.
 	 * 
 	 * @param node
 	 * @param probabilities
@@ -188,25 +223,33 @@ public class BIFParser {
 	private void addNodes(String contents, BeliefNetwork bn) {
 		Matcher probMatcher = PROBABILITY_PATTERN.matcher(contents);
 		while (probMatcher.find()) {
-			
-			String entry = contents.substring(probMatcher.start(), probMatcher.end());
-			Matcher nameMatcher= NAME_PATTERN.matcher(entry);
+
+			String entry = contents.substring(probMatcher.start(),
+					probMatcher.end());
+			Matcher nameMatcher = NAME_PATTERN.matcher(entry);
 			if (nameMatcher.find()) {
-				String found = entry.substring(nameMatcher.start(), nameMatcher.end());
-				
+				String found = entry.substring(
+						nameMatcher.start(),
+						nameMatcher.end());
+
 				// get rid of all non alphabet characters
-				String name = found.replaceAll("[\\(\\)\\|]", "").trim();
+				String name = found.replaceAll("[\\(\\)\\|]",
+						"").trim();
 				BeliefNode bnode = new BeliefNode(name);
-				
 				System.out.print("Found node: " + name + "\n");
+				
 				addParents(bnode, entry);
-				ArrayList<String> states = findStates(name, contents);
+				ArrayList<String> states = findStates(name,
+						contents);
 				if (bnode.numberOfParents() == 0) {
-					addSingleTableEntry(bnode, entry, states);
+					addSingleTableEntry(bnode, entry,
+							states);
 				} else {
 					// Extract all variable names.
-					ArrayList<String> names = bnode.getParents();
-					addMultipleTableEntries(bnode, entry, names, states);
+					ArrayList<String> names = bnode
+							.getParents();
+					addMultipleTableEntries(bnode, entry,
+							names, states);
 				}
 				bn.addNode(bnode);
 			}

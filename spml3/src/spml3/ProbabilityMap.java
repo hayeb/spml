@@ -49,6 +49,7 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 	public void removeObserved(Pair pair) {
 		// System.out.println("Running removeObserved in " + variableName +
 		// "\nEliminating " + pair.getName() + "\n");
+
 		// Initialise an array which holds the keys of the map
 		Pair[][] rows = this.keySet().toArray(new Pair[this.keySet().size()][]);
 
@@ -74,6 +75,12 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 		cleanUpVariables(pair.getName());
 	}
 
+	/**
+	 * Returns a new probability map, with the same name and contents equal
+	 * to this probability map.
+	 * 
+	 * @return
+	 */
 	public ProbabilityMap cloneMap() {
 		ProbabilityMap map = new ProbabilityMap(variableName);
 		for (Pair[] p : this.keySet()) {
@@ -82,16 +89,21 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 		return map;
 	}
 
+	/**
+	 * Cleans up variables in the map. removes all variables in the map
+	 * which name equals the string name
+	 * 
+	 * @param name
+	 *                All variables of which the name equals this string
+	 *                will be removed from the map.
+	 */
 	private void cleanUpVariables(String name) {
-		Pair[][] rows = Arrays.copyOf(this.keySet().toArray(new Pair[this.keySet().size()][]), keySet().size());
 
-		// TODO: Implement cleanup
-		/*
-		 * Steps; 1. For every key-value pair: 2. Copy the key and value 3.
-		 * Remove the observed variable from the key 4. Remove the original
-		 * key-value pair from the structure 5. add the copied/adjusted
-		 * key-value pair
-		 */
+		Pair[][] rows = Arrays.copyOf(
+				this.keySet()
+						.toArray(new Pair[this.keySet()
+								.size()][]),
+				keySet().size());
 
 		for (int i = 0; i < rows.length; i++) {
 			Pair[] value = rows[i];

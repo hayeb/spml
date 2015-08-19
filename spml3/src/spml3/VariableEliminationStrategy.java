@@ -4,11 +4,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class VariableEliminationStrategy implements ProbabilityCalculationStrategy {
-	private ArrayList<String> eliminationOrdering;
+public class VariableEliminationStrategy implements
+		ProbabilityCalculationStrategy {
+	private List<String> eliminationOrdering;
 	private BeliefNetwork beliefnetwork;
-	private ArrayList<Factor> factors;
+	private List<Factor> factors;
 
+	/**
+	 * Initializes this strategy with given belief network and arraylists
+	 * for factors and elimination Ordering
+	 * 
+	 * @param beliefnetwork
+	 */
 	public VariableEliminationStrategy(BeliefNetwork beliefnetwork) {
 		this.beliefnetwork = beliefnetwork;
 		factors = new ArrayList<Factor>();
@@ -16,8 +23,14 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 	}
 
 	/**
+<<<<<<< HEAD
 	 * Generates a elimination ordering according to the total number of parents
 	 * each node has.
+=======
+	 * Generates a elimination ordering according to the total number of
+	 * parents each node has. Places the ordering in the elimination
+	 * ordering list.
+>>>>>>> branch 'master' of https://github.com/hayeb/spml
 	 */
 	private void generateEliminationOrderingParents() {
 		ArrayList<String> noParent = new ArrayList<String>();
@@ -38,7 +51,7 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 	}
 
 	/**
-	 * Generates a factor for every node in the network.
+	 * Generates a factor for every node in the network. Exits if the query node could not be found.
 	 * 
 	 * @param query
 	 */
@@ -125,7 +138,6 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 
 		return 0.00;
 	}
-
 	private Factor multiplyFactors(ArrayList<Factor> toMultiply, String var) {
 		while (toMultiply.size() != 1) {
 			Factor f = toMultiply.remove(0);

@@ -12,8 +12,7 @@ import java.util.HashMap;
  * @author haye
  *
  */
-public class ProbabilityMap extends HashMap<Pair[], Double> implements
-		DataStructuur, Cloneable {
+public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStructuur, Cloneable {
 
 	/**
 	 * 
@@ -27,6 +26,10 @@ public class ProbabilityMap extends HashMap<Pair[], Double> implements
 
 	public ProbabilityMap(String name) {
 		this.variableName = name;
+	}
+
+	public ProbabilityMap() {
+		variableName = "default name";
 	}
 
 	@Override
@@ -44,25 +47,26 @@ public class ProbabilityMap extends HashMap<Pair[], Double> implements
 
 	@Override
 	public void removeObserved(Pair pair) {
-		//System.out.println("Running removeObserved in " + variableName + "\nEliminating " + pair.getName() + "\n");
+		// System.out.println("Running removeObserved in " + variableName +
+		// "\nEliminating " + pair.getName() + "\n");
 		// Initialise an array which holds the keys of the map
-		Pair[][] rows = this.keySet().toArray(
-				new Pair[this.keySet().size()][]);
+		Pair[][] rows = this.keySet().toArray(new Pair[this.keySet().size()][]);
 
 		// For every pair, remove the entry if it has the same name but
 		// not the same state.
 		for (Pair[] p : rows) {
 			boolean keep = true;
 			for (int i = 0; i < p.length && keep; i++) {
-				if (p[i].getName().equals( pair.getName())) {
-					//System.out.print("Found matching pair: " + pair.getName() + "\n");
+				if (p[i].getName().equals(pair.getName())) {
+					// System.out.print("Found matching pair: " + pair.getName()
+					// + "\n");
 					if (!p[i].getState().equals(pair.getState())) {
 						keep = false;
 					}
 				}
 			}
 			if (!keep) {
-				//System.out.println("Removing: " + p);
+				// System.out.println("Removing: " + p);
 				this.removeRow(p);
 
 			}
@@ -79,18 +83,14 @@ public class ProbabilityMap extends HashMap<Pair[], Double> implements
 	}
 
 	private void cleanUpVariables(String name) {
-		Pair[][] rows = Arrays.copyOf(
-				this.keySet()
-						.toArray(new Pair[this.keySet()
-								.size()][]),
-				keySet().size());
+		Pair[][] rows = Arrays.copyOf(this.keySet().toArray(new Pair[this.keySet().size()][]), keySet().size());
 
 		// TODO: Implement cleanup
 		/*
-		 * Steps; 1. For every key-value pair: 2. Copy the key and value
-		 * 3. Remove the observed variable from the key 4. Remove the
-		 * original key-value pair from the structure 5. add the
-		 * copied/adjusted key-value pair
+		 * Steps; 1. For every key-value pair: 2. Copy the key and value 3.
+		 * Remove the observed variable from the key 4. Remove the original
+		 * key-value pair from the structure 5. add the copied/adjusted
+		 * key-value pair
 		 */
 
 		for (int i = 0; i < rows.length; i++) {
@@ -124,5 +124,10 @@ public class ProbabilityMap extends HashMap<Pair[], Double> implements
 	public void removeRow(Pair[] row) {
 		Arrays.sort(row);
 		this.remove(row);
+	}
+
+	@Override
+	public Pair[][] getRows() {
+		return Arrays.copyOf(this.keySet().toArray(new Pair[this.keySet().size()][]), keySet().size());
 	}
 }

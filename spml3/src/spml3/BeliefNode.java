@@ -105,6 +105,12 @@ public class BeliefNode implements DataStructuur {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public Pair[][] getRows() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 	
 }

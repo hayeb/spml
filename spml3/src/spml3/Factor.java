@@ -6,22 +6,16 @@ package spml3;
 import java.util.ArrayList;
 
 /**
- * @author mmwvh
+ * @author 
  *
  */
 public class Factor {
 	private ArrayList<String> variableNames;
-	private ArrayList<Pair> observedVariables;
 
 	/**
 	 * Use this to store the probabilities for this factor.
 	 */
 	private final DataStructuur probabilities;
-
-	/**
-	 * Assume the factor is not observed, initially.
-	 */
-	private boolean observed = false;
 
 	/**
 	 * heeft een lijst met parents per node : factor TODO: Improve docs/this
@@ -31,53 +25,85 @@ public class Factor {
 		probabilities = beliefnode.cloneProbabilitiesTable();
 		variableNames = new ArrayList<String>();
 		variableNames.addAll(probabilities.getVariableNames());
-		observedVariables = new ArrayList<Pair>();
+	}
+	
+	public Factor(DataStructuur map) {
+		probabilities = map;
+		variableNames = new ArrayList<String>();
 	}
 
 	/**
-	 * Reduce the specified observed variable from this factor. This will
-	 * remove all entries in the probability table which do not contain the
-	 * observed variable in its observed state.
+	 * Reduce the specified observed variable from this factor. This will remove
+	 * all entries in the probability table which do not contain the observed
+	 * variable in its observed state.
 	 * 
 	 * @param variable
 	 */
 	public void reduceVariable(Pair observed) {
 		probabilities.removeObserved(observed);
-		adjustNameList(observed.getName());
-		observedVariables.add(observed);
+		updateNameList(observed.getName());
 	}
 
 	/**
-	 * Updates the variable name list according to variables on the
-	 * probability map.
+	 * Updates the variable name list according to variables on the probability
+	 * map.
 	 * 
 	 * @param name
 	 */
-	public void adjustNameList(String name) {
+	public void updateNameList(String name) {
 		variableNames = probabilities.getVariableNames();
 	}
 
-	public boolean isObserved() {
-		return observed;
-	}
-
-	public void setObserved(boolean observed) {
-		this.observed = observed;
-	}
-
+	/**
+	 * 
+	 * @param variableName
+	 * @return
+	 */
 	public boolean hasVariable(String variableName) {
 		return variableNames.contains(variableName);
 	}
 
 	/**
-	 * Returns if this factor only contains 1 variable and if this variable
-	 * is observed according to the string name.
+	 * Returns if this factor only contains 1 variable and if this variable is
+	 * observed according to the string name.
 	 * 
 	 * @return
 	 */
 	public boolean isSingletonObserved(String name) {
-		return variableNames.contains(name)
-				&& variableNames.size() == 1;
+		return variableNames.contains(name) && variableNames.size() == 1;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public DataStructuur getProbabilityData() {
+		return this.probabilities;
+	}
+
+	/**
+	 * Multiplies factor f with this factor.
+	 * 
+	 * @param f
+	 * @return A factor which contains all possible combinations of variables of
+	 *         this factor and factor f and their probability.
+	 */
+	public Factor multiplyFactor(Factor f, String var) {
+		ProbabilityMap m = new ProbabilityMap();
+		DataStructuur fmap = f.getProbabilityData();
+		Pair[][] thisrows = probabilities.getRows();
+		Pair[][] frows = fmap.getRows();
+		
+		for (Pair[] thisp: thisrows) {
+			for (Pair[] fp : frows ) {
+				System.out.print("This row: " + thisp + "\nF row: " + fp + "\nVariable to eliminate: " + var + "\n");
+			}
+		}
+		
+		
+		
+		Factor newFactor = new Factor(m);
+		return newFactor;
 	}
 
 	@Override

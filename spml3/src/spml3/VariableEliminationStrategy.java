@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class VariableEliminationStrategy implements
-		ProbabilityCalculationStrategy {
+public class VariableEliminationStrategy implements ProbabilityCalculationStrategy {
 	private ArrayList<String> eliminationOrdering;
 	private BeliefNetwork beliefnetwork;
 	private ArrayList<Factor> factors;
@@ -17,8 +16,8 @@ public class VariableEliminationStrategy implements
 	}
 
 	/**
-	 * Generates a elimination ordering according to the total number of
-	 * parents each node has.
+	 * Generates a elimination ordering according to the total number of parents
+	 * each node has.
 	 */
 	private void generateEliminationOrderingParents() {
 		ArrayList<String> noParent = new ArrayList<String>();
@@ -27,8 +26,7 @@ public class VariableEliminationStrategy implements
 		for (BeliefNode node : beliefnetwork.getNodes()) {
 			if (beliefnetwork.getNumberOfParentsRecursive(node) == 0) {
 				noParent.add(node.getName());
-			} else if (beliefnetwork
-					.getNumberOfParentsRecursive(node) == 1) {
+			} else if (beliefnetwork.getNumberOfParentsRecursive(node) == 1) {
 				oneParent.add(node.getName());
 			} else {
 				remainder.add(node.getName());
@@ -52,8 +50,7 @@ public class VariableEliminationStrategy implements
 			Factor q = new Factor(n);
 			factors.add(q);
 			for (BeliefNode node : beliefnetwork.getNodes()) {
-				System.out.println("Creating factor: "
-						+ node.getName());
+				System.out.println("Creating factor: " + node.getName());
 				if (!node.getName().equals(query)) {
 					factors.add(new Factor(node));
 				}
@@ -70,8 +67,7 @@ public class VariableEliminationStrategy implements
 	 * 
 	 * @param parents
 	 * 
-	 *                TODO; move the observed calculation from the factor
-	 *                itsself
+	 *            TODO; move the observed calculation from the factor itsself
 	 */
 	public void reduceObserved(Pair[] observed) {
 		ArrayList<Factor> remove = new ArrayList<Factor>();
@@ -94,14 +90,15 @@ public class VariableEliminationStrategy implements
 	public double calculateProbability(String nodeName, Pair[] observedNodes) {
 		identifyFactors(nodeName);
 		generateEliminationOrderingParents();
-		System.out.println("\nElimination ordering:\n "
-				+ eliminationOrdering.toString().replaceAll(
-						"\\[\\]\\,\\s", "") + "\n");
+		System.out.println(
+				"\nElimination ordering:\n " + eliminationOrdering + "\n");
 
 		System.out.print("Reducing observed variables\n");
+		
+		/* Reduce observed variables and remove all observed variables from the elimination ordering */
 		reduceObserved(observedNodes);
 		for (Factor f : factors) {
-			f.adjustNameList(null);
+			f.updateNameList(null);
 		}
 		// For each factor in the elimination ordering..
 		for (String var : eliminationOrdering) {
@@ -114,14 +111,14 @@ public class VariableEliminationStrategy implements
 				}
 			}
 			factors.removeAll(toMultiply);
-			System.out.println("Factors to eliminate: "
-					+ toMultiply);
+			System.out.println("Multiplying: " + toMultiply);
 			if ((toMultiply.size() == 1 && !(factors.size() == 1))) {
-				System.out.print("variable "
-						+ toMultiply.get(0)
+				System.out.print("variable " + toMultiply.get(0)
 						+ " has no influence on the outcome. We will leave this alone.\n");
+			} else if (!toMultiply.isEmpty()) {
+				factors.add(multiplyFactors(toMultiply, var));
 			} else {
-				multiplyFactors(toMultiply);
+				System.out.println("We are done!");
 			}
 
 		}
@@ -129,22 +126,12 @@ public class VariableEliminationStrategy implements
 		return 0.00;
 	}
 
-	private void multiplyFactors(ArrayList<Factor> factors) {
-
-	}
-
-	/**
-	 * Checks the EO for possible error.
-	 * 
-	 * @param nodeName
-	 * @return
-	 */
-	public boolean isInEliminationOrdering(String nodeName) {
-		for (String name : eliminationOrdering) {
-			if (name.equals(nodeName))
-				return true;
+	private Factor multiplyFactors(ArrayList<Factor> toMultiply, String var) {
+		while (toMultiply.size() != 1) {
+			Factor f = toMultiply.remove(0);
+			Factor f2 = toMultiply.remove(0);
+			toMultiply.add(0, f.multiplyFactor(f2, var));
 		}
-		return false;
+		return toMultiply.get(0);
 	}
-
 }

@@ -1,7 +1,6 @@
 package spml3;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class VariableEliminationStrategy implements
@@ -22,17 +21,11 @@ public class VariableEliminationStrategy implements
 		eliminationOrdering = new ArrayList<String>();
 	}
 
-	/**
-<<<<<<< HEAD
-	 * Generates a elimination ordering according to the total number of parents
-	 * each node has.
-=======
-	 * Generates a elimination ordering according to the total number of
+	 /* Generates a elimination ordering according to the total number of
 	 * parents each node has. Places the ordering in the elimination
-	 * ordering list.
->>>>>>> branch 'master' of https://github.com/hayeb/spml
-	 */
-	private void generateEliminationOrderingParents() {
+	 * ordering list	 
+	 * */
+	 private void generateEliminationOrderingParents() {
 		ArrayList<String> noParent = new ArrayList<String>();
 		ArrayList<String> oneParent = new ArrayList<String>();
 		ArrayList<String> remainder = new ArrayList<String>();
@@ -102,13 +95,57 @@ public class VariableEliminationStrategy implements
 	@Override
 	public double calculateProbability(String nodeName, Pair[] observedNodes) {
 		identifyFactors(nodeName);
+		
+		/* This can be replaced by:
+		eliminationOrdering.add("VAR1");
+		eliminationOrdering.add("VAR@");		
+		*/
 		generateEliminationOrderingParents();
+		
 		System.out.println(
 				"\nElimination ordering:\n " + eliminationOrdering + "\n");
-
-		System.out.print("Reducing observed variables\n");
+		for (String s : eliminationOrdering) {
+			boolean observed = false;
+			int observedIndex = -1;
+			// Find out if its observed..
+			for (int i =0; i < observedNodes.length; i++) {
+				if (observedNodes[i].getName().equals(s)) {
+					observed = true;
+					observedIndex = i;
+				}
+			}
+			
+			if (observed) {
+				for (Factor f : factors) {
+					if (f.hasVariable(s)) {
+						f.reduceVariable(observedNodes[observedIndex]);
+					}
+				}
+			} else {
+				for (Factor f : factors) {
+					
+				}
+			}
+		}
 		
-		/* Reduce observed variables and remove all observed variables from the elimination ordering */
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		/* OLD CODE */
+		/* =======================================================================================*/
+		/* Reduce observed variables and remove all observed variables from the elimination ordering 
 		reduceObserved(observedNodes);
 		for (Factor f : factors) {
 			f.updateNameList(null);
@@ -133,8 +170,9 @@ public class VariableEliminationStrategy implements
 			} else {
 				System.out.println("We are done!");
 			}
-
+		 
 		}
+		*/
 
 		return 0.00;
 	}

@@ -58,26 +58,21 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 		for (Pair[] p : rows) {
 			boolean keep = true;
 			for (int i = 0; i < p.length && keep; i++) {
-				if (p[i].getName().equals(pair.getName())) {
-					// System.out.print("Found matching pair: " + pair.getName()
-					// + "\n");
-					if (!p[i].getState().equals(pair.getState())) {
-						keep = false;
-					}
+				if (p[i].getName().equals(pair.getName()) && !p[i].getState().equals(pair.getState())) {
+					keep = false;
 				}
 			}
 			if (!keep) {
-				// System.out.println("Removing: " + p);
 				this.removeRow(p);
-
 			}
 		}
+		//Not sure about this call
 		cleanUpVariables(pair.getName());
 	}
 
 	/**
-	 * Returns a new probability map, with the same name and contents equal
-	 * to this probability map.
+	 * Returns a new probability map, with the same name and contents equal to
+	 * this probability map.
 	 * 
 	 * @return
 	 */
@@ -90,20 +85,16 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 	}
 
 	/**
-	 * Cleans up variables in the map. removes all variables in the map
-	 * which name equals the string name
+	 * Cleans up variables in the map. removes all variables in the map which
+	 * name equals the string name
 	 * 
 	 * @param name
-	 *                All variables of which the name equals this string
-	 *                will be removed from the map.
+	 *            All variables of which the name equals this string will be
+	 *            removed from the map.
 	 */
 	private void cleanUpVariables(String name) {
 
-		Pair[][] rows = Arrays.copyOf(
-				this.keySet()
-						.toArray(new Pair[this.keySet()
-								.size()][]),
-				keySet().size());
+		Pair[][] rows = Arrays.copyOf(this.keySet().toArray(new Pair[this.keySet().size()][]), keySet().size());
 
 		for (int i = 0; i < rows.length; i++) {
 			Pair[] value = rows[i];

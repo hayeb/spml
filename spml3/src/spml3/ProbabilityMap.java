@@ -66,7 +66,7 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 				this.removeRow(p);
 			}
 		}
-		//Not sure about this call
+		// Not sure about this call
 		cleanUpVariables(pair.getName());
 	}
 

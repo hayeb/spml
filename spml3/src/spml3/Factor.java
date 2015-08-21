@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * @author 
  *
  */
-public class Factor {
+public class Factor implements DataStructuur {
 	private ArrayList<String> variableNames;
 
 	/**
@@ -30,7 +30,9 @@ public class Factor {
 	public Factor(DataStructuur map) {
 		probabilities = map;
 		variableNames = new ArrayList<String>();
+		variableNames.addAll(probabilities.getVariableNames());
 	}
+
 
 	/**
 	 * Reduce the specified observed variable from this factor. This will remove
@@ -82,32 +84,6 @@ public class Factor {
 	public DataStructuur getProbabilityData() {
 		return this.probabilities;
 	}
-
-	/**
-	 * Multiplies factor f with this factor.
-	 * 
-	 * @param f
-	 * @return A factor which contains all possible combinations of variables of
-	 *         this factor and factor f and their probability.
-	 */
-	public Factor multiplyFactor(Factor f, String var) {
-		ProbabilityMap m = new ProbabilityMap();
-		DataStructuur fmap = f.getProbabilityData();
-		Pair[][] thisrows = probabilities.getRows();
-		Pair[][] frows = fmap.getRows();
-		
-		for (Pair[] thisp: thisrows) {
-			for (Pair[] fp : frows ) {
-				System.out.print("This row: " + thisp + "\nF row: " + fp + "\nVariable to eliminate: " + var + "\n");
-			}
-		}
-		
-		
-		
-		Factor newFactor = new Factor(m);
-		return newFactor;
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -123,5 +99,38 @@ public class Factor {
 			}
 		}
 		return "f(" + sb.toString() + ")";
+	}
+
+	@Override
+	public void addProbability(Pair[] query, double probability) {
+		this.probabilities.addProbability(query, probability);
+		
+	}
+
+	@Override
+	public double getProbability(Pair[] query) {
+		return this.probabilities.getProbability(query);
+	}
+
+	@Override
+	public void removeObserved(Pair pair) {
+		this.probabilities.removeObserved(pair);
+		
+	}
+
+	@Override
+	public void removeRow(Pair[] row) {
+		this.removeRow(row);
+		
+	}
+
+	@Override
+	public ArrayList<String> getVariableNames() {
+		return this.probabilities.getVariableNames();
+	}
+
+	@Override
+	public Pair[][] getRows() {
+		return this.probabilities.getRows();
 	}
 }

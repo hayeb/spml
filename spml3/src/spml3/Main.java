@@ -9,7 +9,7 @@ public class Main {
 		BIFParser bp = new BIFParser();
 		try {
 			BeliefNetwork bn = bp.parse(new File("fire.bif"));
-			bn.calculateProbability("report", new Pair[] {new Pair("fire", "T"), new Pair("tampering", "F")});
+			bn.calculateProbability("leaving", new Pair[] {new Pair("fire", "T"), new Pair("tampering", "F")});
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -1,6 +1,7 @@
 package spml3;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -106,41 +107,43 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 
 		System.out.println("\nElimination ordering:\n " + eliminationOrdering + "\n");
 		for (String s : eliminationOrdering) {
-			boolean observed = false;
-			int observedIndex = -1;
+			if (!s.equals(nodeName)) {
+				boolean observed = false;
+				int observedIndex = -1;
 
-			/* Find out if its observed.. */
-			for (int i = 0; i < observedNodes.length && !observed; i++) {
-				if (observedNodes[i].getName().equals(s)) {
-					observed = true;
-					observedIndex = i;
+				/* Find out if its observed.. */
+				for (int i = 0; i < observedNodes.length && !observed; i++) {
+					if (observedNodes[i].getName().equals(s)) {
+						observed = true;
+						observedIndex = i;
+					}
 				}
-			}
 
-			if (observed) {
-				ArrayList<Factor> toRemove = new ArrayList<Factor>();
-				for (Factor f : factors) {
-					if (f.hasVariable(s)) {
-						f.reduceVariable(observedNodes[observedIndex]);
-						if (f.getVariableNames().size() == 0) {
-							toRemove.add(f);
+				if (observed) {
+					ArrayList<Factor> toRemove = new ArrayList<Factor>();
+					for (Factor f : factors) {
+						if (f.hasVariable(s)) {
+							f.reduceVariable(observedNodes[observedIndex]);
+							if (f.getVariableNames().size() == 0) {
+								toRemove.add(f);
+							}
 						}
 					}
-				}
-				factors.removeAll(toRemove);
-			} else {
-				ArrayList<Factor> toMultiply = new ArrayList<Factor>();
-				for (Factor f : factors) {
-					if (f.hasVariable(s)) {
-						toMultiply.add(f);
+					factors.removeAll(toRemove);
+				} else {
+					ArrayList<Factor> toMultiply = new ArrayList<Factor>();
+					for (Factor f : factors) {
+						if (f.hasVariable(s)) {
+							toMultiply.add(f);
+						}
 					}
+					factors.removeAll(toMultiply);
+					/* Multiple the factors containing the variable into one */
+					Factor m = multiplyFactors(toMultiply, s);
+					/* Sum out the variable.. */
+					Factor d = sumOut(m, s);
+					factors.add(d);
 				}
-				factors.removeAll(toMultiply);
-				/* Multiple the factors containing the variable into one */
-				Factor m = multiplyFactors(toMultiply, s);
-				/* Sum out the variable.. */
-				Factor d = sumOut(m, s);
-				factors.add(d);
 			}
 		}
 		return 0.00;
@@ -184,15 +187,49 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 
 	private Factor sumOut(Factor f, String variable) {
 		Pair[][] rows = f.getProbabilityData().getRows();
-		Pair[][] otherrows = new Pair[rows.length][];
-		System.arraycopy(rows, 0, otherrows, 0, rows.length);
+		ArrayList<Pair[]> done = new ArrayList<Pair[]>();
 		ProbabilityMap map = new ProbabilityMap();
+		boolean changed = false;
 		for (Pair[] row : rows) {
-			for (Pair[] otherrow : otherrows) {
-				// TODO: Complete
+			for (Pair[] otherrow : rows) {
+				if (summableRow(row, otherrow, variable) && !done.contains(row) && !done.contains(otherrow)
+						&& !row.equals(otherrow)) {
+					changed = true;
+					done.add(row);
+					done.add(otherrow);
+					Pair[] newrow = new Pair[row.length - 1];
+					for (int i = 0, j = 0; i < row.length; i++) {
+						if (!row[i].getName().equals(variable)) {
+							newrow[j] = row[i];
+							j++;
+						}
+					}
+					map.addProbability(newrow, f.getProbability(row) + f.getProbability(otherrow));
+				}
 			}
 		}
-		return f;
+		if (changed) {
+			return new Factor(map);
+		} else {
+			return f;
+		}
+	}
+
+	private boolean summableRow(Pair[] row1, Pair[] row2, String sumvar) {
+		Arrays.sort(row1);
+		Arrays.sort(row2);
+		if (row1.length == 1) {
+			return false;
+		}
+		for (Pair p1 : row1) {
+			for (Pair p2 : row2) {
+				if (!p1.getName().equals(sumvar) && p1.getName().equals(p2.getName())
+						&& !p1.getState().equals(p2.getState())) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	private Pair[] concatAndSet(Pair[] a, Pair[] b) {

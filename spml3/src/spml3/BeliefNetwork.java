@@ -61,7 +61,7 @@ public class BeliefNetwork implements ProbabilityCalculationStrategy {
 	}
 
 	@Override
-	public double calculateProbability(String nodeName, Pair[] query) {
-		return calcStrategy.calculateProbability(nodeName, query);
+	public double calculateProbability(Pair observed, Pair[] query) {
+		return calcStrategy.calculateProbability(observed, query);
 	}
 }

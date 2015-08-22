@@ -1,8 +1,9 @@
 package spml3;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public interface DataStructuur {
+public interface TableDataStructure {
 
 	
 	/**
@@ -14,7 +15,7 @@ public interface DataStructuur {
 	 *            the same ordering as the list of parent in this node.
 	 * @param probability
 	 */
-	public void addProbability(Pair[] query, double probability);
+	public void addProbability(List<Pair> query, double probability);
 
 	/**
 	 * Returns a probability of the node being in equal to the state given the query pairs.
@@ -23,7 +24,7 @@ public interface DataStructuur {
 	 * @param state
 	 * @return
 	 */
-	public double getProbability(Pair[] query);
+	public double getProbability(List<Pair> query);
 	
 	/**
 	 * Removes all entries in the map which do not contain specified pair
@@ -34,7 +35,7 @@ public interface DataStructuur {
 	/**
 	 * Removes a row from the table
 	 */
-	public void removeRow(Pair[] row);
+	public void removeRow(List<Pair> row);
 	
 	/**
 	 * Returns the variablenames in this data structure

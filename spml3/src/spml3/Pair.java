@@ -1,6 +1,6 @@
 package spml3;
 
-public class Pair implements Comparable<Pair> {
+public class Pair implements Comparable<Pair>{
 
 	private final String name;
 	private final String state;
@@ -72,13 +72,6 @@ public class Pair implements Comparable<Pair> {
 
 	@Override
 	public String toString() {
-		return "Pair [name=" + name + ", state=" + state + "]";
+		return name + ": " + state;
 	}
-	
-	
-
-	
-
-	
-
 }

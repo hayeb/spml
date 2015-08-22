@@ -1,8 +1,9 @@
 package spml3;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class BeliefNode implements DataStructuur {
+public class BeliefNode implements TableDataStructure {
 
 	/**
 	 * Name of the node
@@ -18,7 +19,7 @@ public class BeliefNode implements DataStructuur {
 	 * The data structure containing a probability table.
 	 */
 	private ProbabilityMap probabilities;
-	private DataStructuur probStructure;
+	private TableDataStructure probStructure;
 
 	/**
 	 * Creates a BeliefNode with given name and a ProbabilityMap as data
@@ -36,12 +37,12 @@ public class BeliefNode implements DataStructuur {
 	}
 
 	@Override
-	public void addProbability(Pair[] query, double probability) {
+	public void addProbability(List<Pair> query, double probability) {
 		probStructure.addProbability(query, probability);
 	}
 
 	@Override
-	public double getProbability(Pair[] query) {
+	public double getProbability(List<Pair> query) {
 		return probStructure.getProbability(query);
 	}
 
@@ -101,9 +102,8 @@ public class BeliefNode implements DataStructuur {
 	}
 
 	@Override
-	public void removeRow(Pair[] row) {
-		// TODO Auto-generated method stub
-		
+	public void removeRow(List<Pair> row) {
+		probStructure.removeRow(row);
 	}
 
 	@Override

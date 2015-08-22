@@ -3,16 +3,18 @@ package spml3;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A map specifically designed to store a list of pairs against a double. Only
  * use the interface DataStructuur with this class. This guarantees that all
  * queries will be handled correctly.
  * 
- * @author haye
+ * @author hayeb
  *
  */
-public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStructuur, Cloneable {
+public class ProbabilityMap extends HashMap<List<Pair>, Double>implements TableDataStructure {
 
 	/**
 	 * 
@@ -33,16 +35,23 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 	}
 
 	@Override
-	public void addProbability(Pair[] query, double probability) {
-		Arrays.sort(query);
+	public void addProbability(List<Pair> query, double probability) {
+		query.sort(new PairComparator());
 		this.put(query, probability);
 
 	}
 
 	@Override
-	public double getProbability(Pair[] query) {
-		Arrays.sort(query);
-		return this.get(query);
+	public double getProbability(List<Pair> query) {
+		query.sort(new PairComparator());
+		if (this.containsKey(query)) {
+			return (Double) get(query);
+		} else {
+			System.err.print("Map does not contain: " + query + "\n");
+			return 0.0;
+
+		}
+
 	}
 
 	@Override
@@ -51,22 +60,26 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 		// "\nEliminating " + pair.getName() + "\n");
 
 		// Initialise an array which holds the keys of the map
-		Pair[][] rows = this.keySet().toArray(new Pair[this.keySet().size()][]);
+		Set<List<Pair>> rows = this.keySet();
 
 		// For every pair, remove the entry if it has the same name but
 		// not the same state.
-		for (Pair[] p : rows) {
+		ArrayList<List<Pair>> toRemove = new ArrayList<List<Pair>>();
+		for (List<Pair> p : rows) {
 			boolean keep = true;
-			for (int i = 0; i < p.length && keep; i++) {
-				if (p[i].getName().equals(pair.getName()) && !p[i].getState().equals(pair.getState())) {
+			for (int i = 0; i < p.size() && keep; i++) {
+				if (p.get(i).getName().equals(pair.getName()) && !p.get(i).getState().equals(pair.getState())) {
 					keep = false;
 				}
 			}
 			if (!keep) {
-				this.removeRow(p);
+				toRemove.add(p);
 			}
 		}
 		// Not sure about this call
+		for (List<Pair> p : toRemove) {
+			removeRow(p);
+		}
 		cleanUpVariables(pair.getName());
 	}
 
@@ -78,7 +91,7 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 	 */
 	public ProbabilityMap cloneMap() {
 		ProbabilityMap map = new ProbabilityMap(variableName);
-		for (Pair[] p : this.keySet()) {
+		for (List<Pair> p : this.keySet()) {
 			map.addProbability(p, this.get(p));
 		}
 		return map;
@@ -94,28 +107,36 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 	 */
 	private void cleanUpVariables(String name) {
 
-		Pair[][] rows = Arrays.copyOf(this.keySet().toArray(new Pair[this.keySet().size()][]), keySet().size());
+		Set<List<Pair>> rows = keySet();
+		ArrayList<List<Pair>> toRemove = new ArrayList<List<Pair>>();
+		ArrayList<List<Pair>> toAddKeys = new ArrayList<List<Pair>>();
+		ArrayList<Double> toAddValues = new ArrayList<Double>();
 
-		for (int i = 0; i < rows.length; i++) {
-			Pair[] value = rows[i];
-			double key = this.getProbability(value);
+		for (List<Pair> plist : rows) {
+			double value = this.getProbability(plist);
 			ArrayList<Pair> newKeyList = new ArrayList<Pair>();
 
-			for (int j = 0; j < value.length; j++) {
-				Pair p = value[j];
-				if (!value[j].getName().equals(name)) {
+			for (int j = 0; j < plist.size(); j++) {
+				Pair p = plist.get(j);
+				if (!plist.get(j).getName().equals(name)) {
 					newKeyList.add(p);
 				}
 			}
-			this.removeRow(value);
-			Pair[] newKey = new Pair[newKeyList.size()];
-			this.addProbability(newKeyList.toArray(newKey), key);
+			toRemove.add(plist);
+			toAddKeys.add(newKeyList);
+			toAddValues.add(value);
+		}
+		for (List<Pair> p : toRemove) {
+			removeRow(p);
+		}
+		for (List<Pair> p : toAddKeys) {
+			this.addProbability(p, toAddValues.remove(0));
 		}
 	}
 
 	@Override
 	public ArrayList<String> getVariableNames() {
-		Pair[] p = this.keySet().iterator().next();
+		List<Pair> p = this.keySet().iterator().next();
 		ArrayList<String> names = new ArrayList<String>();
 		for (Pair pair : p) {
 			names.add(pair.getName());
@@ -124,13 +145,20 @@ public class ProbabilityMap extends HashMap<Pair[], Double>implements DataStruct
 	}
 
 	@Override
-	public void removeRow(Pair[] row) {
-		Arrays.sort(row);
+	public void removeRow(List<Pair> row) {
+		row.sort(new PairComparator());
 		this.remove(row);
 	}
 
 	@Override
 	public Pair[][] getRows() {
-		return Arrays.copyOf(this.keySet().toArray(new Pair[this.keySet().size()][]), keySet().size());
+		Set<List<Pair>> rowset = keySet();
+		Pair[][] rowarray = new Pair[rowset.size()][];
+		int i = 0;
+		for (List<Pair> p : rowset) {
+			rowarray[i] = p.toArray(new Pair[p.size()]);
+			i++;
+		}
+		return rowarray;
 	}
 }

@@ -4,18 +4,19 @@
 package spml3;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author 
+ * @author
  *
  */
-public class Factor implements DataStructuur {
+public class Factor implements TableDataStructure {
 	private ArrayList<String> variableNames;
 
 	/**
 	 * Use this to store the probabilities for this factor.
 	 */
-	private final DataStructuur probabilities;
+	private final TableDataStructure probabilities;
 
 	/**
 	 * heeft een lijst met parents per node : factor TODO: Improve docs/this
@@ -26,13 +27,12 @@ public class Factor implements DataStructuur {
 		variableNames = new ArrayList<String>();
 		variableNames.addAll(probabilities.getVariableNames());
 	}
-	
-	public Factor(DataStructuur map) {
+
+	public Factor(TableDataStructure map) {
 		probabilities = map;
 		variableNames = new ArrayList<String>();
 		variableNames.addAll(probabilities.getVariableNames());
 	}
-
 
 	/**
 	 * Reduce the specified observed variable from this factor. This will remove
@@ -57,8 +57,8 @@ public class Factor implements DataStructuur {
 	}
 
 	/**
-	 * Returns if this factor has a variable with given name. Does not
-	 * account for case sensitivity or trailing whitespace etc.
+	 * Returns if this factor has a variable with given name. Does not account
+	 * for case sensitivity or trailing whitespace etc.
 	 * 
 	 * @param variableName
 	 * @return
@@ -76,21 +76,20 @@ public class Factor implements DataStructuur {
 	public boolean isSingletonObserved(String name) {
 		return variableNames.contains(name) && variableNames.size() == 1;
 	}
-	
+
 	/**
 	 * 
 	 * @return
 	 */
-	public DataStructuur getProbabilityData() {
+	public TableDataStructure getProbabilityData() {
 		return this.probabilities;
 	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		if (variableNames.size() > 0) {
 			for (int i = 0; i < variableNames.size(); i++) {
-				boolean observedVariable = false;
-				String state = "";
 				sb.append(variableNames.get(i));
 
 				if (!(i == variableNames.size() - 1)) {
@@ -102,26 +101,26 @@ public class Factor implements DataStructuur {
 	}
 
 	@Override
-	public void addProbability(Pair[] query, double probability) {
+	public void addProbability(List<Pair> query, double probability) {
 		this.probabilities.addProbability(query, probability);
-		
+
 	}
 
 	@Override
-	public double getProbability(Pair[] query) {
-		return this.probabilities.getProbability(query);
+	public double getProbability(List<Pair> query) {
+		return probabilities.getProbability(query);
 	}
 
 	@Override
 	public void removeObserved(Pair pair) {
 		this.probabilities.removeObserved(pair);
-		
+
 	}
 
 	@Override
-	public void removeRow(Pair[] row) {
+	public void removeRow(List<Pair> row) {
 		this.removeRow(row);
-		
+
 	}
 
 	@Override

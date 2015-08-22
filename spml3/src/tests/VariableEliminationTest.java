@@ -23,7 +23,7 @@ public class VariableEliminationTest {
 	public void test() {
 		// Test the fire network
 		Pair[] pairs = {new Pair("alarm", "T"), new Pair("tampering", "F")};
-		bn.calculateProbability("report", pairs);
+		bn.calculateProbability(new Pair("report", "T"), pairs);
 		
 	}
 

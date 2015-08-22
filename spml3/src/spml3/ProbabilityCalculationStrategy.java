@@ -11,5 +11,5 @@ public interface ProbabilityCalculationStrategy {
 	 *            Observed variables in the network. The list should consist of pairs of the observed variable name and the state of the observed variable
 	 * @return
 	 */
-	public double calculateProbability(String nodeName, Pair[] observedNodes);
+	public double calculateProbability(Pair query, Pair[] observedNodes);
 }

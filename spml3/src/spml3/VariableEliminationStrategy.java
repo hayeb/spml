@@ -27,21 +27,24 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 	 * Generates a elimination ordering according to the total number of parents
 	 * each node has. Places the ordering in the elimination ordering list
 	 */
-	private void generateEliminationOrderingParents() {
+	private void generateEliminationOrderingParents(String nodeName) {
 		ArrayList<String> noParent = new ArrayList<String>();
 		ArrayList<String> oneParent = new ArrayList<String>();
 		ArrayList<String> remainder = new ArrayList<String>();
 		for (BeliefNode node : beliefnetwork.getNodes()) {
-			if (beliefnetwork.getNumberOfParentsRecursive(node) == 0) {
-				noParent.add(node.getName());
-			} else if (beliefnetwork.getNumberOfParentsRecursive(node) == 1) {
-				oneParent.add(node.getName());
-			} else {
-				remainder.add(node.getName());
+			if (!node.getName().equals(nodeName)) {
+				if (beliefnetwork.getNumberOfParentsRecursive(node) == 0) {
+					noParent.add(node.getName());
+				} else if (beliefnetwork.getNumberOfParentsRecursive(node) == 1) {
+					oneParent.add(node.getName());
+				} else {
+					remainder.add(node.getName());
+				}
 			}
 		}
 		oneParent.addAll(remainder);
 		noParent.addAll(oneParent);
+		noParent.add(nodeName);
 		eliminationOrdering = noParent;
 	}
 
@@ -96,57 +99,63 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 	}
 
 	@Override
-	public double calculateProbability(String nodeName, Pair[] observedNodes) {
-		identifyFactors(nodeName);
+	public double calculateProbability(Pair query, Pair[] observedNodes) {
+		identifyFactors(query.getName());
 
 		/*
 		 * This can be replaced by: eliminationOrdering.add("VAR1");
 		 * eliminationOrdering.add("VAR2"); etc etc..
 		 */
-		generateEliminationOrderingParents();
+		generateEliminationOrderingParents(query.getName());
 
 		System.out.println("\nElimination ordering:\n " + eliminationOrdering + "\n");
 		for (String s : eliminationOrdering) {
-			if (!s.equals(nodeName)) {
-				boolean observed = false;
-				int observedIndex = -1;
+			boolean observed = false;
+			int observedIndex = -1;
 
-				/* Find out if its observed.. */
-				for (int i = 0; i < observedNodes.length && !observed; i++) {
-					if (observedNodes[i].getName().equals(s)) {
-						observed = true;
-						observedIndex = i;
+			/* Find out if its observed.. */
+			for (int i = 0; i < observedNodes.length && !observed; i++) {
+				if (observedNodes[i].getName().equals(s)) {
+					observed = true;
+					observedIndex = i;
+				}
+			}
+
+			if (observed) {
+				ArrayList<Factor> toRemove = new ArrayList<Factor>();
+				for (Factor f : factors) {
+					if (f.hasVariable(s)) {
+						f.reduceVariable(observedNodes[observedIndex]);
+						if (f.getVariableNames().size() == 0) {
+							toRemove.add(f);
+						}
 					}
 				}
-
-				if (observed) {
-					ArrayList<Factor> toRemove = new ArrayList<Factor>();
-					for (Factor f : factors) {
-						if (f.hasVariable(s)) {
-							f.reduceVariable(observedNodes[observedIndex]);
-							if (f.getVariableNames().size() == 0) {
-								toRemove.add(f);
-							}
-						}
+				factors.removeAll(toRemove);
+			} else {
+				ArrayList<Factor> toMultiply = new ArrayList<Factor>();
+				for (Factor f : factors) {
+					if (f.hasVariable(s)) {
+						toMultiply.add(f);
 					}
-					factors.removeAll(toRemove);
-				} else {
-					ArrayList<Factor> toMultiply = new ArrayList<Factor>();
-					for (Factor f : factors) {
-						if (f.hasVariable(s)) {
-							toMultiply.add(f);
-						}
-					}
-					factors.removeAll(toMultiply);
-					/* Multiple the factors containing the variable into one */
-					Factor m = multiplyFactors(toMultiply, s);
-					/* Sum out the variable.. */
+				}
+				factors.removeAll(toMultiply);
+				/* Multiple the factors containing the variable into one */
+				Factor m = multiplyFactors(toMultiply, s);
+				/* Sum out the variable.. */
+				if (!s.equals(query.getName())) {
 					Factor d = sumOut(m, s);
-					factors.add(d);
+					if (d != null) {
+						factors.add(d);
+					}
+				} else {
+					factors.add(m);
 				}
 			}
 		}
-		return 0.00;
+		ArrayList<Pair> querylist = new ArrayList<Pair>();
+		querylist.add(query);
+		return factors.get(0).getProbability(querylist);
 	}
 
 	/**
@@ -174,8 +183,8 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 			for (Pair[] otherrow : r2) {
 				for (int j = 0; j < otherrow.length; j++) {
 					if (otherrow[j].equals(target)) {
-						Pair[] newKey = concatAndSet(row, otherrow);
-						Double newValue = f1.getProbability(row) * f2.getProbability(otherrow);
+						List<Pair> newKey = Arrays.asList(concatAndSet(row, otherrow)) ;
+						Double newValue = f1.getProbability(Arrays.asList(row)) * f2.getProbability(Arrays.asList(otherrow));
 						map.addProbability(newKey, newValue);
 					}
 				}
@@ -191,20 +200,22 @@ public class VariableEliminationStrategy implements ProbabilityCalculationStrate
 		ProbabilityMap map = new ProbabilityMap();
 		boolean changed = false;
 		for (Pair[] row : rows) {
+			if (row.length == 1) {
+				return null;
+			}
 			for (Pair[] otherrow : rows) {
 				if (summableRow(row, otherrow, variable) && !done.contains(row) && !done.contains(otherrow)
 						&& !row.equals(otherrow)) {
 					changed = true;
 					done.add(row);
 					done.add(otherrow);
-					Pair[] newrow = new Pair[row.length - 1];
-					for (int i = 0, j = 0; i < row.length; i++) {
+					List<Pair> newrow = new ArrayList<Pair>();
+					for (int i = 0; i < row.length; i++) {
 						if (!row[i].getName().equals(variable)) {
-							newrow[j] = row[i];
-							j++;
+							newrow.add(row[i]);
 						}
 					}
-					map.addProbability(newrow, f.getProbability(row) + f.getProbability(otherrow));
+					map.addProbability(newrow, f.getProbability(Arrays.asList(row)) + f.getProbability(Arrays.asList(otherrow)));
 				}
 			}
 		}
